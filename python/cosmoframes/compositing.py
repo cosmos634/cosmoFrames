@@ -51,7 +51,10 @@ def composite(destination, source, mode="normal"):
     blended = _blend_rgb(dst_rgb, src_rgb, mode)
     # A transparent destination has no underlying colour: use the source colour there.
     blended = Image.composite(blended, src_rgb, dst_rgba.getchannel("A"))
-    mixed_rgb = Image.composite(blended, dst_rgb, src_rgba.getchannel("A"))
+    src_alpha = src_rgba.getchannel("A")
+    # Preserve source RGB where the destination has no visible pixel.
+    mix_mask = ImageChops.lighter(src_alpha, ImageChops.invert(dst_rgba.getchannel("A")))
+    mixed_rgb = Image.composite(blended, dst_rgb, mix_mask)
     result = Image.alpha_composite(dst_rgba, src_rgba)
     result.paste(mixed_rgb, (0, 0))
     destination.paste(result)
