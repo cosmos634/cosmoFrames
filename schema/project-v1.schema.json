@@ -71,6 +71,11 @@
       "items": {
         "$ref": "#/$defs/scene"
       }
+    },
+    "browser_entry": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Optional HTML entry point used by the render-browser command; path is relative to the project file."
     }
   },
   "$defs": {
