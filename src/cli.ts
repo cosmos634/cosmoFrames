@@ -22,7 +22,7 @@ function runBrowser(project: string): void {
   process.exit(result.status ?? 1);
 }
 function help(): void {
-  console.log("CosmoFrames 1.0\nUsage:\n  cosmoframes info\n  cosmoframes init <name>\n  cosmoframes validate <project.json>\n  cosmoframes preview <project.json> [--time seconds]\n  cosmoframes render <project.json>\n  cosmoframes render-browser <project.json>\n  cosmoframes benchmark <project.json> [--frames N]\n\nSet COSMOFRAMES_PYTHON to choose the Python executable.");
+  console.log("CosmoFrames 1.1\nUsage:\n  cosmoframes info\n  cosmoframes init <name>\n  cosmoframes validate <project.json>\n  cosmoframes preview <project.json> [--time seconds]\n  cosmoframes render <project.json>\n  cosmoframes render-browser <project.json>\n  cosmoframes benchmark <project.json> [--frames N]\n\nSet COSMOFRAMES_PYTHON to choose the Python executable.");
 }
 switch (command) {
   case "info": runPython("info"); break;
