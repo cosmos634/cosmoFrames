@@ -61,7 +61,7 @@ async function main(): Promise<void> {
   const tracks = [...(project.audio_tracks || [])];
   if (project.audio) tracks.unshift({ src: project.audio, start: 0, volume: 1 });
   const args = ["-y", "-loglevel", "error", "-f", "image2pipe", "-vcodec", "png",
-    "-framerate", String(fps), "-video_size", width + "x" + height, "-i", "-"];
+    "-framerate", String(fps), "-i", "-"];
   const filters: string[] = [];
   const labels: string[] = [];
   for (let i = 0; i < tracks.length; i++) {
@@ -105,7 +105,7 @@ async function main(): Promise<void> {
     const started = Date.now();
     for (let index = 0; index < frames; index++) {
       const time = index / fps;
-      await page.evaluate(async ({ time, index }) => {
+      await page.evaluate(async ({ time, index }: { time: number; index: number }) => {
         const target = (window as any).cosmoframesRender || (window as any).renderAt;
         if (typeof target === "function") await target(time, index);
       }, { time, index });
