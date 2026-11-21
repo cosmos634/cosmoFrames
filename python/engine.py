@@ -20,7 +20,7 @@ def load(path):
     return p
 
 def main():
-    if len(sys.argv)<2: die("Expected info/init/validate/preview/render",2)
+    if len(sys.argv)<2: die("Expected info/init/validate/preview/render/benchmark",2)
     action=sys.argv[1]
     if action=="info":
         import PIL
