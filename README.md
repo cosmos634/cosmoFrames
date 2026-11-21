@@ -49,7 +49,7 @@ node dist/cli.js render examples/vertical-demo/project.json
 
 The rendered file is written to examples/vertical-demo/cosmoframes-demo.mp4.
 
-To create a new project:
+Frame dimensions are capped at 8.3 megapixels per project to reduce out-of-memory failures on phones. Asset, font and gradient caches are bounded and kept intentionally small.\n\nTo create a new project:
 
 ```sh
 node dist/cli.js init my-video
@@ -62,10 +62,13 @@ node dist/cli.js render my-video/project.json
 Add an audio path to the project root, relative to project.json:
 
 ```json
-"audio": "music.mp3"
+"audio_tracks": [
+  { "src": "music.mp3", "start": 0, "volume": 0.35 },
+  { "src": "voice.wav", "start": 1.2, "volume": 1.0 }
+]
 ```
 
-FFmpeg muxes the audio as AAC. The current implementation supports one audio file.
+FFmpeg mixes all tracks and muxes the result as AAC. The legacy `audio` field remains supported.
 
 ## Development
 
