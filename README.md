@@ -18,7 +18,7 @@ Implemented: fade and directional wipe scene transitions (in/out), linear gradie
 
 The optional Chromium/CDP backend is available through `render-browser`. It renders an HTML entry page using a deterministic `window.cosmoframesRender(timeSeconds, frameIndex)` hook and streams PNG frames into FFmpeg. It supports browser-native HTML/CSS/JS, Canvas, SVG and libraries such as GSAP when those are included by the page. Vector-path masks and GPU acceleration are not implemented.
 
-See [Architecture](docs/ARCHITECTURE.md) and [Project Format](docs/PROJECT_FORMAT.md) for implementation details.
+See [Architecture](docs/ARCHITECTURE.md), [Project Format](docs/PROJECT_FORMAT.md) and [Changelog](CHANGELOG.md) for implementation details.
 
 ## Requirements
 
