@@ -43,6 +43,13 @@ test("CLI init creates a project that validates", () => {
   }
 });
 
+test("CLI benchmark reports render performance", () => {
+  const result = run(["benchmark", path.join(root, "examples/vertical-demo/project.json"), "--frames", "2"]);
+  assert.equal(result.status, 0, result.stderr);
+  assert.match(result.stdout, /Benchmark: 2 frames/);
+  assert.match(result.stdout, /peak RSS|Python-tracked peak/);
+});
+
 test("CLI rejects unknown commands", () => {
   const result = run(["not-a-command"]);
   assert.equal(result.status, 2);
