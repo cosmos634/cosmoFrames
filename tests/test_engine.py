@@ -63,6 +63,19 @@ class EngineTests(unittest.TestCase):
         self.assertEqual(engine.frame(p, 48).getpixel((32, 32)), (0, 0, 0))
         self.assertEqual(engine.frame(p, 24).getpixel((32, 32)), (255, 255, 255))
 
+    def test_validates_audio_tracks(self):
+        project = {"version": 1, "resolution": {"width": 10, "height": 10},
+                   "audio_tracks": [{"src": "music.wav", "start": 0.25, "volume": 0.7}],
+                   "scenes": [{"elements": []}]}
+        engine.validate(project)
+
+    def test_rejects_audio_track_volume_above_limit(self):
+        project = {"version": 1, "resolution": {"width": 10, "height": 10},
+                   "audio_tracks": [{"src": "music.wav", "volume": 5}],
+                   "scenes": [{"elements": []}]}
+        with self.assertRaises(SystemExit):
+            engine.validate(project)
+
     def test_rejects_unsupported_scene_transition(self):
         project = {"version": 1, "resolution": {"width": 10, "height": 10},
                    "scenes": [{"transition_in": {"type": "wipe", "duration": 1}, "elements": []}]}
