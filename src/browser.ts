@@ -133,6 +133,10 @@ async function main(): Promise<void> {
       await page.evaluate(async ({ time, index }: { time: number; index: number }) => {
         const target = (window as any).cosmoframesRender || (window as any).renderAt;
         if (typeof target === "function") await target(time, index);
+        for (const animation of document.getAnimations()) {
+          animation.pause();
+          animation.currentTime = time * 1000;
+        }
       }, { time, index });
       const png = await page.screenshot({ type: "png", animations: "allow" });
       await writeFrame(proc, png);
