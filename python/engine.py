@@ -7,6 +7,7 @@ import PIL
 from cosmoframes.animation import ease, value
 from cosmoframes.errors import die
 from cosmoframes.rendering import frame, render
+from cosmoframes.profiling import benchmark
 from cosmoframes.validation import validate
 
 VERSION = "1.0.0"
@@ -44,6 +45,13 @@ def main():
         idx=max(0,min(math.ceil(p.get("duration",5)*p.get("fps",30))-1,int(at*p.get("fps",30))))
         dest=path.parent/"preview.png"; frame(p,idx).save(dest); print("Saved "+str(dest))
     elif action=="render": render(p,path)
+    elif action=="benchmark":
+        count = None
+        if "--frames" in sys.argv:
+            try: count = int(sys.argv[sys.argv.index("--frames") + 1])
+            except (ValueError, IndexError): die("--frames requires a positive integer.", 2)
+            if count <= 0: die("--frames must be greater than zero.", 2)
+        benchmark(p, count)
     else: die("Unknown action: "+action,2)
 
 if __name__ == "__main__": main()
