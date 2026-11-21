@@ -1,10 +1,27 @@
 """Pillow drawing and streamed FFmpeg MP4 rendering."""
 import math, shutil, subprocess, sys, time
 from pathlib import Path
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageColor, ImageDraw, ImageFont
 from .animation import value
 from .errors import die
 from .transitions import scene_opacity
+
+def gradient_image(size, spec):
+    colors = [ImageColor.getrgb(c) for c in spec["colors"]]
+    strip = Image.new("RGB", (256, 1))
+    pixels = []
+    for x in range(256):
+        pos = x / 255 * (len(colors) - 1)
+        index = min(len(colors) - 2, int(pos))
+        f = pos - index
+        a, b = colors[index], colors[index + 1]
+        pixels.append(tuple(int(a[i] + (b[i] - a[i]) * f) for i in range(3)))
+    strip.putdata(pixels)
+    angle = float(spec.get("angle", 0))
+    if angle:
+        strip = strip.rotate(angle, resample=Image.Resampling.BICUBIC, expand=True)
+    return strip.resize(size, Image.Resampling.BICUBIC).convert("RGBA")
+
 
 def get_font(size, bold=False):
     paths = ["/system/fonts/Roboto-Bold.ttf","/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"] if bold else ["/system/fonts/Roboto-Regular.ttf","/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"]
@@ -21,7 +38,7 @@ def draw(canvas, el, t, base):
     layer = Image.new("RGBA",canvas.size,(0,0,0,0)); d=ImageDraw.Draw(layer)
     fill=el.get("color",el.get("fill","#ffffff")); typ=el["type"]
     if typ=="text":
-        f=get_font(int(float(el.get("fontSize",48))*scale),bool(el.get("bold",False)))
+        f=get_font(int(float(value(el,"fontSize",el.get("fontSize",48),t))*scale),bool(el.get("bold",False)))
         d.text((x,y),str(el.get("text","")),font=f,fill=fill,anchor=el.get("anchor","lt"),stroke_width=int(el.get("strokeWidth",0)),stroke_fill=el.get("strokeColor","#000000"))
     elif typ=="rectangle":
         w=float(value(el,"width",el.get("width",100),t))*scale
@@ -38,16 +55,24 @@ def draw(canvas, el, t, base):
         if not src.is_file(): die("Image asset not found: "+str(src))
         try:
             im=Image.open(src).convert("RGBA")
-            iw=int(el.get("width",im.width)*scale); ih=int(el.get("height",im.height)*scale)
+            iw=int(float(value(el,"width",el.get("width",im.width),t))*scale); ih=int(float(value(el,"height",el.get("height",im.height),t))*scale)
             im=im.resize((max(1,iw),max(1,ih))); layer.alpha_composite(im,(int(x),int(y)))
         except Exception as e: die("Could not load image: "+str(e))
-    if rotation: layer=layer.rotate(-rotation,resample=Image.Resampling.BICUBIC,center=(int(x),int(y)))
+    if "gradient" in el:
+        gradient = gradient_image(canvas.size, el["gradient"])
+        gradient.putalpha(layer.getchannel("A"))
+        layer = gradient
+    if rotation:
+        bounds = layer.getbbox()
+        if bounds:
+            center = ((bounds[0] + bounds[2]) / 2, (bounds[1] + bounds[3]) / 2)
+            layer = layer.rotate(-rotation, resample=Image.Resampling.BICUBIC, center=center)
     if opacity<1: layer.putalpha(layer.getchannel("A").point(lambda a:int(a*opacity)))
     canvas.alpha_composite(layer)
 
 def frame(p, index):
     w,h=p["resolution"]["width"],p["resolution"]["height"]; t=index/float(p.get("fps",30))
-    canvas=Image.new("RGBA",(w,h),p.get("background","#101018"))
+    canvas=gradient_image((w,h),p["background_gradient"]) if "background_gradient" in p else Image.new("RGBA",(w,h),p.get("background","#101018"))
     for scene in p["scenes"]:
         scene_start = float(scene.get("start", 0))
         scene_end = float(scene.get("end", p.get("duration", 5)))
