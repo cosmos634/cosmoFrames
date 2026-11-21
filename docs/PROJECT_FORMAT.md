@@ -51,3 +51,16 @@ A linear gradient can be used as the project background or as a fill for text an
 For an element, place the same object in its `gradient` field. Two to eight valid colors are supported. The angle is in degrees. Image elements use their source image rather than a gradient fill.
 
 Text `fontSize`, image `width` and image `height` can be animated with numeric keyframes.
+
+
+## Masks and blend modes
+
+An element can use a grayscale image as an alpha mask. White keeps the layer visible, black hides it, and gray values create partial transparency:
+
+```json
+"mask": { "src": "masks/title-mask.png", "invert": false }
+```
+
+The mask is resized to the project frame dimensions. Set `invert` to `true` to reverse it. Mask image paths are relative to the project JSON file.
+
+Elements and scenes support `blend_mode`: `normal`, `multiply`, `screen`, `add`, and `overlay`. The default is `normal`. These modes are composited on the CPU; complex projects may render more slowly on low-end phones.
