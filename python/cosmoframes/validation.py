@@ -15,6 +15,15 @@ def validate(p):
     if p.get("version") != 1: die("version must equal 1.", 2)
     for key in ("output", "audio"):
         if key in p and (not isinstance(p[key], str) or not p[key].strip()): die(key + " must be a non-empty path string.", 2)
+    if "audio_tracks" in p:
+        tracks = p["audio_tracks"]
+        if not isinstance(tracks, list) or not tracks: die("audio_tracks must be a non-empty array.", 2)
+        for i, track in enumerate(tracks):
+            label = "audio_tracks[%d]" % i
+            if not isinstance(track, dict) or not isinstance(track.get("src"), str) or not track["src"].strip():
+                die(label + ".src must be a non-empty path string.", 2)
+            number(track.get("start", 0), label + ".start", 0)
+            number(track.get("volume", 1), label + ".volume", 0, 4)
     def color(v, label):
         if not isinstance(v, str): die(label + " must be a CSS-style color string.", 2)
         try: ImageColor.getcolor(v, "RGBA")
