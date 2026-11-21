@@ -33,7 +33,13 @@ async function waitForClose(proc: EncoderProcess): Promise<number> {
 }
 
 async function writeFrame(proc: EncoderProcess, bytes: Buffer): Promise<void> {
-  if (!proc.stdin.write(bytes)) await once(proc.stdin, "drain");
+  if (proc.stdin.destroyed) throw new Error("FFmpeg input pipe is closed.");
+  if (!proc.stdin.write(bytes)) {
+    await Promise.race([
+      once(proc.stdin, "drain"),
+      once(proc.stdin, "close").then(() => { throw new Error("FFmpeg closed its input pipe."); })
+    ]);
+  }
 }
 
 async function main(): Promise<void> {
@@ -44,7 +50,9 @@ async function main(): Promise<void> {
   let project: Project;
   try { project = JSON.parse(readFileSync(absoluteProject, "utf8")) as Project; }
   catch (error) { fail("Invalid project JSON: " + String(error)); }
-  if (!project.browser_entry) fail('Browser project requires "browser_entry": "scene.html".');
+  if (!project || typeof project !== "object") fail("Project JSON root must be an object.");
+  if (typeof project.browser_entry !== "string" || !project.browser_entry.trim())
+    fail('Browser project requires "browser_entry": "scene.html".');
   const base = dirname(absoluteProject);
   const entry = resolve(base, project.browser_entry);
   if (!existsSync(entry)) fail("Browser entry file not found: " + entry);
@@ -54,7 +62,11 @@ async function main(): Promise<void> {
   const duration = project.duration ?? 5;
   if (!Number.isInteger(width) || !Number.isInteger(height) || width! < 1 || height! < 1 ||
       width! * height! > 8294400) fail("Invalid resolution or frame size exceeds 8.3 megapixels.");
-  if (!(fps > 0 && fps <= 60) || !(duration > 0 && duration <= 600)) fail("FPS or duration is outside supported limits.");
+  if (!Number.isFinite(fps) || !(fps > 0 && fps <= 60) ||
+      !Number.isFinite(duration) || !(duration > 0 && duration <= 600))
+    fail("FPS or duration is outside supported limits.");
+  if (project.output !== undefined && (typeof project.output !== "string" || !project.output.trim()))
+    fail("output must be a non-empty path string.");
   const ffmpeg = process.env.COSMOFRAMES_FFMPEG || "ffmpeg";
   const output = resolve(base, project.output || "browser-output.mp4");
   mkdirSync(dirname(output), { recursive: true });
@@ -108,6 +120,7 @@ async function main(): Promise<void> {
     await page.goto(pathToFileURL(entry).href, { waitUntil: "load" });
     await page.evaluate(async () => { if (document.fonts?.ready) await document.fonts.ready; });
     proc = spawn(ffmpeg, args, { stdio: ["pipe", "ignore", "inherit"] });
+    await once(proc, "spawn");
     const completion = waitForClose(proc).then(
       code => ({ code }),
       error => ({ error })
@@ -130,7 +143,7 @@ async function main(): Promise<void> {
     const finished = await completion;
     if ("error" in finished) fail("FFmpeg process failed: " + String(finished.error));
     if (finished.code !== 0) fail("FFmpeg exited with code " + finished.code);
-    if (!existsSync(output)) fail("MP4 output was not created.");
+    if (!existsSync(output) || statSync(output).size === 0) fail("MP4 output was not created or is empty.");
     console.log("Created %s (%d bytes) in %.1fs", output,
       statSync(output).size, (Date.now() - started) / 1000);
     await page.close();
