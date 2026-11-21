@@ -28,7 +28,7 @@ switch (command) {
   case "info": runPython("info"); break;
   case "init": if (!args[1]) { console.error("Usage: cosmoframes init <name>"); process.exit(2); } runPython("init", undefined, [args[1]]); break;
   case "validate":
-  case "render":
+  case "render": if (!args[1]) { console.error("Usage: cosmoframes " + command + " <project.json>"); process.exit(2); } runPython(command, args[1]); break;
   case "render-browser": if (!args[1]) { console.error("Usage: cosmoframes render-browser <project.json>"); process.exit(2); } runBrowser(args[1]); break;
   case "benchmark": if (!args[1]) { console.error("Usage: cosmoframes " + command + " <project.json>"); process.exit(2); } runPython(command, args[1], args.slice(2)); break;
   case "preview": if (!args[1]) { console.error("Usage: cosmoframes preview <project.json> [--time seconds]"); process.exit(2); } runPython("preview", args[1], args.slice(2)); break;
