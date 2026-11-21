@@ -1,0 +1,33 @@
+# CosmoFrames Architecture
+
+## Current lightweight backend
+
+The current renderer is split into small Python modules under `python/cosmoframes/`:
+
+- `errors.py` — consistent CLI errors and exit codes
+- `validation.py` — project schema, asset fields, colors and animation validation
+- `animation.py` — deterministic keyframe interpolation and easing
+- `rendering.py` — Pillow drawing, frame composition and FFmpeg streaming
+- `engine.py` — command-line entry point and project loading
+
+The lightweight backend is the default and only implemented backend in the current release. It renders one frame at a time and streams raw RGB bytes to FFmpeg.
+
+## Backend boundary
+
+A future browser backend must consume the same project timeline and frame-time convention:
+
+`time_seconds = frame_index / fps`
+
+It must remain optional. Installing or using the lightweight backend must never require Chromium, a GPU, Docker, or a cloud service.
+
+## Planned browser backend
+
+The planned browser backend may use HTML/CSS/JS, Canvas or SVG, with Chromium controlled through CDP where supported. It is not implemented yet and must not be treated as available functionality.
+
+## Resource constraints
+
+- Do not hold the complete video in RAM.
+- Avoid unnecessary copies of full-resolution frames.
+- Keep FFmpeg as a streaming encoder process.
+- Make temporary files explicit and clean them up.
+- Keep browser dependencies out of the lightweight install path.
