@@ -2,10 +2,14 @@ import importlib.util
 import tempfile
 import unittest
 from PIL import Image
-from cosmoframes.compositing import composite
 from pathlib import Path
+import sys
 
-ENGINE = Path(__file__).resolve().parents[1] / "python" / "engine.py"
+PYTHON_DIR = Path(__file__).resolve().parents[1] / "python"
+sys.path.insert(0, str(PYTHON_DIR))
+from cosmoframes.compositing import composite
+
+ENGINE = PYTHON_DIR / "engine.py"
 spec = importlib.util.spec_from_file_location("cosmoframes_engine", ENGINE)
 engine = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(engine)
