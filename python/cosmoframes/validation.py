@@ -2,6 +2,7 @@
 import math
 from PIL import ImageColor
 from .errors import die
+from .transitions import TRANSITION_TYPES
 
 TYPES = {"text", "rectangle", "circle", "polygon", "image"}
 
@@ -55,11 +56,19 @@ def validate(p):
             if prop in scene: number(scene[prop], "scenes[%d].%s" % (si, prop), 0)
         if "end" in scene and scene["end"] <= scene.get("start", 0): die("scenes[%d].end must be greater than start." % si, 2)
         if scene.get("blend_mode", "normal") not in blend_modes: die("scenes[%d].blend_mode is unsupported." % si, 2)
-        transition = scene.get("transition_in")
-        if transition is not None:
-            if not isinstance(transition, dict): die("scenes[%d].transition_in must be an object." % si, 2)
-            if transition.get("type", "fade") != "fade": die("Only fade scene transitions are supported in this version.", 2)
-            number(transition.get("duration", 0), "scenes[%d].transition_in.duration" % si, 0, 30)
+        scene_start = float(scene.get("start", 0))
+        scene_end = float(scene.get("end", p.get("duration", 5)))
+        for transition_name in ("transition_in", "transition_out"):
+            transition = scene.get(transition_name)
+            if transition is not None:
+                label = "scenes[%d].%s" % (si, transition_name)
+                if not isinstance(transition, dict): die(label + " must be an object.", 2)
+                kind = transition.get("type", "fade")
+                if kind not in TRANSITION_TYPES:
+                    die(label + ".type is unsupported. Supported: " + ", ".join(sorted(TRANSITION_TYPES)), 2)
+                number(transition.get("duration", 0), label + ".duration", 0, 30)
+                if transition.get("duration", 0) > scene_end - scene_start:
+                    die(label + ".duration cannot exceed the scene duration.", 2)
         for ei, el in enumerate(scene.get("elements", [])):
             label = "scenes[%d].elements[%d]" % (si, ei)
             if not isinstance(el, dict) or el.get("type") not in TYPES:
