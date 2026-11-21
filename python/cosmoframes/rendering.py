@@ -7,6 +7,7 @@ from .animation import value
 from .errors import die
 from .transitions import apply_scene_transitions
 from .compositing import apply_mask, composite
+from .plugins import apply_plugins
 
 @lru_cache(maxsize=2)
 def _gradient_cached(size, colors, angle):
@@ -103,6 +104,10 @@ def frame(p, index):
         scene_duration = scene_end - scene_start
         apply_scene_transitions(scene_layer, scene, local_time, scene_duration)
         composite(canvas, scene_layer, scene.get("blend_mode", "normal"))
+    try:
+        canvas = apply_plugins(canvas, p.get("plugins", []), p["_base"], t)
+    except Exception as exc:
+        die("Effect plugin failed: " + str(exc))
     return canvas.convert("RGB")
 
 def render(p,path):
