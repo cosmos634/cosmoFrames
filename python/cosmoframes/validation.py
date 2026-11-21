@@ -69,6 +69,10 @@ def validate(p):
         if scene.get("blend_mode", "normal") not in blend_modes: die("scenes[%d].blend_mode is unsupported." % si, 2)
         scene_start = float(scene.get("start", 0))
         scene_end = float(scene.get("end", p.get("duration", 5)))
+        if scene_start >= float(p.get("duration", 5)):
+            die("scenes[%d].start must be before the project duration." % si, 2)
+        if scene_end > float(p.get("duration", 5)):
+            die("scenes[%d].end cannot exceed the project duration." % si, 2)
         for transition_name in ("transition_in", "transition_out"):
             transition = scene.get(transition_name)
             if transition is not None:
