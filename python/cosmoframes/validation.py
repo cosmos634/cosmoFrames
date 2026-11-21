@@ -16,6 +16,15 @@ def validate(p):
     if p.get("version") != 1: die("version must equal 1.", 2)
     for key in ("output", "audio"):
         if key in p and (not isinstance(p[key], str) or not p[key].strip()): die(key + " must be a non-empty path string.", 2)
+    if "browser_entry" in p and (not isinstance(p["browser_entry"], str) or not p["browser_entry"].strip()):
+        die("browser_entry must be a non-empty path string.", 2)
+    if "plugins" in p:
+        if not isinstance(p["plugins"], list): die("plugins must be an array.", 2)
+        for i, plugin in enumerate(p["plugins"]):
+            if not isinstance(plugin, dict) or not isinstance(plugin.get("src"), str) or not plugin["src"].strip():
+                die("plugins[%d].src must be a non-empty path string." % i, 2)
+            if "settings" in plugin and not isinstance(plugin["settings"], dict):
+                die("plugins[%d].settings must be an object." % i, 2)
     if "audio_tracks" in p:
         tracks = p["audio_tracks"]
         if not isinstance(tracks, list) or not tracks: die("audio_tracks must be a non-empty array.", 2)
