@@ -2,6 +2,7 @@
 """CosmoFrames command-line entry point."""
 import json, math, shutil, sys
 from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 import PIL
 from cosmoframes.animation import ease, value
 from cosmoframes.errors import die
