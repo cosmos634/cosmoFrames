@@ -1,7 +1,8 @@
-"""Layer masks and blend-mode compositing."""
+"""Layer masks and alpha-aware CPU blend-mode compositing."""
 from PIL import Image, ImageChops
 
 BLEND_MODES = {"normal", "multiply", "screen", "add", "overlay"}
+
 
 def apply_mask(layer, mask_spec, base):
     if not mask_spec:
@@ -15,10 +16,27 @@ def apply_mask(layer, mask_spec, base):
         mask = source.convert("L").resize(layer.size, Image.Resampling.LANCZOS)
     if mask_spec.get("invert", False):
         mask = ImageChops.invert(mask)
-    alpha = ImageChops.multiply(layer.getchannel("A"), mask)
     result = layer.copy()
-    result.putalpha(alpha)
+    result.putalpha(ImageChops.multiply(result.getchannel("A"), mask))
     return result
+
+
+def _blend_rgb(destination, source, mode):
+    if mode == "multiply":
+        return ImageChops.multiply(destination, source)
+    if mode == "screen":
+        return ImageChops.screen(destination, source)
+    if mode == "add":
+        return ImageChops.add(destination, source)
+    channels = []
+    for dst, src in zip(destination.split(), source.split()):
+        low = ImageChops.multiply(dst, src).point(lambda value: min(255, value * 2))
+        inverse_product = ImageChops.multiply(ImageChops.invert(dst), ImageChops.invert(src))
+        high = ImageChops.invert(inverse_product.point(lambda value: min(255, value * 2)))
+        threshold = dst.point(lambda value: 255 if value >= 128 else 0)
+        channels.append(Image.composite(high, low, threshold))
+    return Image.merge("RGB", channels)
+
 
 def composite(destination, source, mode="normal"):
     if mode not in BLEND_MODES:
@@ -26,22 +44,14 @@ def composite(destination, source, mode="normal"):
     if mode == "normal":
         destination.alpha_composite(source)
         return
-    dst = destination.convert("RGB")
-    src = source.convert("RGB")
-    if mode == "multiply":
-        blended = ImageChops.multiply(dst, src)
-    elif mode == "screen":
-        blended = ImageChops.screen(dst, src)
-    elif mode == "add":
-        blended = ImageChops.add(dst, src)
-    else:
-        low = ImageChops.add(ImageChops.multiply(dst, src), ImageChops.multiply(dst, src))
-        screen = ImageChops.screen(dst, src)
-        high = ImageChops.add(screen, screen, scale=1, offset=-255)
-        luminance = dst.convert("L").point(lambda value: 255 if value >= 128 else 0)
-        blended = Image.composite(high, low, luminance)
-    alpha = source.getchannel("A")
-    mixed = Image.composite(blended, dst, alpha)
-    out = Image.alpha_composite(destination, source)
-    out.paste(mixed, (0, 0))
-    destination.paste(out)
+    dst_rgba = destination.convert("RGBA")
+    src_rgba = source.convert("RGBA")
+    dst_rgb = dst_rgba.convert("RGB")
+    src_rgb = src_rgba.convert("RGB")
+    blended = _blend_rgb(dst_rgb, src_rgb, mode)
+    # A transparent destination has no underlying colour: use the source colour there.
+    blended = Image.composite(blended, src_rgb, dst_rgba.getchannel("A"))
+    mixed_rgb = Image.composite(blended, dst_rgb, src_rgba.getchannel("A"))
+    result = Image.alpha_composite(dst_rgba, src_rgba)
+    result.paste(mixed_rgb, (0, 0))
+    destination.paste(result)
