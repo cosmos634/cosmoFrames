@@ -29,6 +29,15 @@ def validate(p):
         try: ImageColor.getcolor(v, "RGBA")
         except ValueError: die(label + " is not a recognized color: " + v, 2)
     color(p.get("background", "#101018"), "background")
+    def gradient(spec, label):
+        if not isinstance(spec, dict) or spec.get("type", "linear") != "linear":
+            die(label + " must be a linear gradient object.", 2)
+        colors = spec.get("colors")
+        if not isinstance(colors, list) or not 2 <= len(colors) <= 8:
+            die(label + ".colors must contain 2 to 8 colors.", 2)
+        for i, item in enumerate(colors): color(item, label + ".colors[%d]" % i)
+        number(spec.get("angle", 0), label + ".angle", 0, 360)
+    if "background_gradient" in p: gradient(p["background_gradient"], "background_gradient")
     r = p.get("resolution")
     if not isinstance(r, dict): die("resolution must be an object.", 2)
     for key in ("width", "height"):
@@ -37,7 +46,7 @@ def validate(p):
     number(p.get("fps", 30), "fps", 0.1, 60)
     number(p.get("duration", 5), "duration", 0.01, 600)
     if not isinstance(p.get("scenes"), list) or not p["scenes"]: die("scenes must be a non-empty array.", 2)
-    allowed_animations = {"x", "y", "width", "height", "scale", "opacity", "rotation"}
+    allowed_animations = {"x", "y", "width", "height", "fontSize", "scale", "opacity", "rotation"}
     easings = {"linear", "ease-in", "ease-out", "ease-in-out"}
     for si, scene in enumerate(p["scenes"]):
         if not isinstance(scene, dict) or not isinstance(scene.get("elements", []), list): die("Invalid scene at index " + str(si), 2)
@@ -59,6 +68,9 @@ def validate(p):
             if el["type"] == "text" and not isinstance(el.get("text", ""), str): die(label + ".text must be a string.", 2)
             color(el.get("color", el.get("fill", "#ffffff")), label + ".color")
             if "strokeColor" in el: color(el["strokeColor"], label + ".strokeColor")
+            if "gradient" in el:
+                if el["type"] == "image": die(label + " images cannot use a fill gradient.", 2)
+                gradient(el["gradient"], label + ".gradient")
             if el["type"] == "image" and (not isinstance(el.get("src"), str) or not el["src"].strip()): die(label + ".src must be a non-empty path.", 2)
             if el["type"] == "polygon":
                 pts = el.get("points")
