@@ -4,6 +4,7 @@ from pathlib import Path
 from PIL import Image, ImageDraw, ImageFont
 from .animation import value
 from .errors import die
+from .transitions import scene_opacity
 
 def get_font(size, bold=False):
     paths = ["/system/fonts/Roboto-Bold.ttf","/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"] if bold else ["/system/fonts/Roboto-Regular.ttf","/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"]
@@ -48,9 +49,20 @@ def frame(p, index):
     w,h=p["resolution"]["width"],p["resolution"]["height"]; t=index/float(p.get("fps",30))
     canvas=Image.new("RGBA",(w,h),p.get("background","#101018"))
     for scene in p["scenes"]:
-        for el in scene.get("elements",[]):
-            start,end=float(el.get("start",0)),float(el.get("end",p.get("duration",5)))
-            if start<=t<end: draw(canvas,el,t-start,p["_base"])
+        scene_start = float(scene.get("start", 0))
+        scene_end = float(scene.get("end", p.get("duration", 5)))
+        local_time = t - scene_start
+        if not scene_start <= t < scene_end:
+            continue
+        scene_layer = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+        for el in scene.get("elements", []):
+            start, end = float(el.get("start", 0)), float(el.get("end", scene_end - scene_start))
+            if start <= local_time < end:
+                draw(scene_layer, el, local_time - start, p["_base"])
+        opacity = scene_opacity(scene, local_time)
+        if opacity < 1:
+            scene_layer.putalpha(scene_layer.getchannel("A").point(lambda a: int(a * opacity)))
+        canvas.alpha_composite(scene_layer)
     return canvas.convert("RGB")
 
 def render(p,path):
