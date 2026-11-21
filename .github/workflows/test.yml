@@ -27,6 +27,8 @@ jobs:
       - name: Run render integration test
         run: |
           node dist/cli.js validate examples/vertical-demo/project.json
+          node dist/cli.js validate examples/plugin-demo/project.json
+          node dist/cli.js validate examples/browser-demo/project.json
           node dist/cli.js preview examples/vertical-demo/project.json --time 1.5
           node dist/cli.js render examples/vertical-demo/project.json
           test -s examples/vertical-demo/cosmoframes-demo.mp4
