@@ -30,3 +30,4 @@ jobs:
           node dist/cli.js preview examples/vertical-demo/project.json --time 1.5
           node dist/cli.js render examples/vertical-demo/project.json
           test -s examples/vertical-demo/cosmoframes-demo.mp4
+          python tests/test_audio_render.py
