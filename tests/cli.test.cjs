@@ -1,7 +1,7 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
 const { spawnSync } = require("node:child_process");
-const { mkdtempSync, existsSync, rmSync } = require("node:fs");
+const { mkdtempSync, existsSync, rmSync, readFileSync } = require("node:fs");
 const { tmpdir } = require("node:os");
 const path = require("node:path");
 
@@ -14,6 +14,14 @@ function run(args) {
     encoding: "utf8"
   });
 }
+
+test("Project JSON schema parses and lists supported transitions", () => {
+  const schema = JSON.parse(readFileSync(path.join(root, "schema/project-v1.schema.json"), "utf8"));
+  assert.equal(schema.properties.version.const, 1);
+  assert.deepEqual(schema.$defs.transition.properties.type.enum,
+    ["fade", "wipe_left", "wipe_right", "wipe_up", "wipe_down"]);
+  assert.ok(schema.$defs.animations.properties.opacity);
+});
 
 test("CLI help exits successfully", () => {
   const result = run(["--help"]);
