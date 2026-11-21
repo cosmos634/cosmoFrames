@@ -10,7 +10,7 @@ from cosmoframes.rendering import frame, render
 from cosmoframes.profiling import benchmark
 from cosmoframes.validation import validate
 
-VERSION = "1.0.0"
+VERSION = "1.1.0"
 
 def load(path):
     try: p = json.loads(path.read_text(encoding="utf-8"))
