@@ -1,5 +1,6 @@
 """Trusted user plugin loader for per-frame image effects."""
 import importlib.util
+import sys
 from functools import lru_cache
 from pathlib import Path
 from PIL import Image
@@ -14,7 +15,12 @@ def _load(path):
     if spec is None or spec.loader is None:
         raise ValueError("Could not load plugin: " + str(source))
     module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
+    sys.modules[spec.name] = module
+    try:
+        spec.loader.exec_module(module)
+    except Exception:
+        sys.modules.pop(spec.name, None)
+        raise
     apply = getattr(module, "apply", None)
     if not callable(apply):
         raise ValueError("Plugin must define apply(image, time_seconds, settings).")
