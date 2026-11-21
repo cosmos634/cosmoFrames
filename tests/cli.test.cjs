@@ -30,7 +30,7 @@ test("CLI info reports renderer dependencies", () => {
 
 test("CLI init creates a project that validates", () => {
   const temp = mkdtempSync(path.join(tmpdir(), "cosmoframes-test-"));
-  const projectDir = path.join(temp, "sample");
+  const projectDir = path.join(temp, "sample", "project");
   try {
     const created = run(["init", projectDir]);
     assert.equal(created.status, 0, created.stderr);
