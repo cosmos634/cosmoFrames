@@ -1,9 +1,10 @@
 #!/usr/bin/env node
 /** Optional Chromium/CDP renderer. Requires playwright-core and a running CDP browser. */
-import { existsSync, readFileSync, mkdirSync } from "node:fs";
+import { existsSync, readFileSync, mkdirSync, statSync } from "node:fs";
 import { resolve, dirname, basename, extname } from "node:path";
 import { pathToFileURL } from "node:url";
-import { spawn, type ChildProcessWithoutNullStreams } from "node:child_process";
+import { spawn, type ChildProcessByStdio } from "node:child_process";
+import type { Writable } from "node:stream";
 import { once } from "node:events";
 
 type Track = { src: string; start?: number; volume?: number };
@@ -22,14 +23,16 @@ function fail(message: string): never {
   process.exit(1);
 }
 
-async function waitForClose(proc: ChildProcessWithoutNullStreams): Promise<number> {
+type EncoderProcess = ChildProcessByStdio<Writable, null, null>;
+
+async function waitForClose(proc: EncoderProcess): Promise<number> {
   return await new Promise((resolveCode, reject) => {
     proc.once("error", reject);
     proc.once("close", code => resolveCode(code ?? 1));
   });
 }
 
-async function writeFrame(proc: ChildProcessWithoutNullStreams, bytes: Buffer): Promise<void> {
+async function writeFrame(proc: EncoderProcess, bytes: Buffer): Promise<void> {
   if (!proc.stdin.write(bytes)) await once(proc.stdin, "drain");
 }
 
@@ -88,7 +91,7 @@ async function main(): Promise<void> {
   try { browser = await chromium.connectOverCDP(cdp, { timeout: 5000 }); }
   catch { fail("Cannot connect to Chromium CDP at " + cdp +
     ". Start Chromium with --remote-debugging-port=9222 or set COSMOFRAMES_CDP_URL."); }
-  let proc: ChildProcessWithoutNullStreams | undefined;
+  let proc: EncoderProcess | undefined;
   try {
     const context = browser.contexts()[0] || await browser.newContext();
     const page = await context.newPage();
@@ -116,7 +119,7 @@ async function main(): Promise<void> {
     if (code !== 0) fail("FFmpeg exited with code " + code);
     if (!existsSync(output)) fail("MP4 output was not created.");
     console.log("Created %s (%d bytes) in %.1fs", output,
-      readFileSync(output).byteLength, (Date.now() - started) / 1000);
+      statSync(output).size, (Date.now() - started) / 1000);
     await page.close();
   } finally {
     if (proc && !proc.stdin.destroyed) proc.stdin.destroy();
