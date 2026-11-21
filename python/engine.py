@@ -24,7 +24,7 @@ def main():
     action=sys.argv[1]
     if action=="info":
         import PIL
-        print("CosmoFrames "+VERSION+"\nPython "+sys.version.split()[0]+"\nPillow "+PIL.__version__+"\nFFmpeg "+str(shutil.which("ffmpeg") or "not found")+"\nChromium optional; V1 uses Pillow")
+        print("CosmoFrames "+VERSION+"\nPython "+sys.version.split()[0]+"\nPillow "+PIL.__version__+"\nFFmpeg "+str(shutil.which("ffmpeg") or "not found")+"\nRenderer: Pillow CPU default\nBrowser: optional Chromium/CDP via playwright-core")
         return
     if action=="init":
         name=sys.argv[2] if len(sys.argv)>2 else "my-video"; folder=Path(name).resolve()
