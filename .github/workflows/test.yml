@@ -31,3 +31,4 @@ jobs:
           node dist/cli.js render examples/vertical-demo/project.json
           test -s examples/vertical-demo/cosmoframes-demo.mp4
           python tests/audio_render_integration.py
+          node dist/cli.js benchmark examples/vertical-demo/project.json --frames 24
