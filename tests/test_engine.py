@@ -61,6 +61,30 @@ class EngineTests(unittest.TestCase):
         pixel = image.getpixel((32, 32))
         self.assertTrue(115 <= pixel[0] <= 140, pixel)
 
+    def test_scene_wipe_left_transition(self):
+        p = {"resolution": {"width": 64, "height": 32}, "fps": 24, "duration": 2,
+             "background": "#000000", "scenes": [{"transition_in": {"type": "wipe_left", "duration": 1},
+             "elements": [{"type": "rectangle", "x": 0, "y": 0, "width": 64, "height": 32, "color": "#ffffff"}]}],
+             "_base": Path(".")}
+        image = engine.frame(p, 12)
+        self.assertEqual(image.getpixel((8, 16)), (255, 255, 255))
+        self.assertEqual(image.getpixel((56, 16)), (0, 0, 0))
+
+    def test_scene_fade_out_transition(self):
+        p = {"resolution": {"width": 32, "height": 32}, "fps": 10, "duration": 2,
+             "background": "#000000", "scenes": [{"transition_out": {"type": "fade", "duration": 1},
+             "elements": [{"type": "rectangle", "x": 0, "y": 0, "width": 32, "height": 32, "color": "#ffffff"}]}],
+             "_base": Path(".")}
+        image = engine.frame(p, 15)
+        value = image.getpixel((16, 16))[0]
+        self.assertTrue(115 <= value <= 140, value)
+
+    def test_rejects_transition_longer_than_scene(self):
+        project = {"version": 1, "resolution": {"width": 10, "height": 10}, "duration": 2,
+                   "scenes": [{"end": 1, "transition_in": {"type": "fade", "duration": 1.5}, "elements": []}]}
+        with self.assertRaises(SystemExit):
+            engine.validate(project)
+
     def test_scene_start_and_end_boundaries(self):
         p = {"resolution": {"width": 64, "height": 64}, "fps": 24, "duration": 3,
              "background": "#000000", "scenes": [{"start": 1, "end": 2,
