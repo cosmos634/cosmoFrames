@@ -80,7 +80,7 @@ Install the optional Node dependency and start a local Chromium instance with th
 
 ```sh
 npm install playwright-core
-chromium --remote-debugging-port=9222 --user-data-dir=/tmp/cosmoframes-chrome
+chromium --headless=new --remote-debugging-port=9222 --user-data-dir=/tmp/cosmoframes-chrome
 node dist/cli.js render-browser examples/browser-demo/project.json
 ```
 
