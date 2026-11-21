@@ -1,5 +1,7 @@
 # CosmoFrames V1 Project Format
 
+The machine-readable schema is available at [schema/project-v1.schema.json](../schema/project-v1.schema.json).
+
 Project JSON uses version 1, resolution width and height, fps (default 30, maximum 60), duration seconds (default 5, maximum 600), background color, output filename, optional audio filename, and a non-empty scenes array. Media paths are relative to the project file.
 
 Supported element types: text, rectangle, circle, polygon, image. Common fields include x, y, scale, opacity, rotation, start, end, color, and animations. Text supports text, fontSize, bold, and anchor. Rectangle supports width, height, radius. Circle supports radius. Polygon supports points as local [x,y] pairs. Image supports src, width, height.
