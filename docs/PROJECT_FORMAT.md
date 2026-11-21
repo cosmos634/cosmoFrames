@@ -8,7 +8,7 @@ Supported element types: text, rectangle, circle, polygon, image. Common fields 
 
 Animations map a property name to keyframes: each keyframe has time, value, and optional easing. Easing values are linear, ease-in, ease-out, ease-in-out. Keyframe times must be strictly increasing and numeric values must be finite. Opacity values are in the 0–1 range; scale cannot be negative. Time is relative to the element start. Frame time is frame_index / fps. Colors must be valid Pillow/CSS-style color strings. Resolution dimensions are positive integers up to 8192 per side, with a total limit of 8.3 megapixels to protect memory on mobile devices; fps is 0.1–60 and duration is 0.01–600 seconds.
 
-Current limitations: browser rendering (HTML/CSS/JS, Canvas, SVG, GSAP), vector-path masks, and advanced transition presets are not implemented. Unsupported element types fail validation.
+Current limitations: vector-path masks, GPU acceleration, and advanced transition presets are not implemented. Browser rendering is an optional separate command that uses a project-level `browser_entry`; it does not add HTML elements to the lightweight scene schema. Unsupported lightweight element types fail validation.
 
 
 ## Scene timeline and transitions
