@@ -16,6 +16,8 @@ The repository currently contains the first working-code foundation:
 
 Not implemented yet: Chromium/CDP browser rendering, HTML/CSS/JS execution, Canvas/SVG, gradients, transition presets, multi-track audio, caching and profiling. These are not advertised as working V1 features yet. The browser backend is optional and is not needed by the current renderer.
 
+See [Architecture](docs/ARCHITECTURE.md) and [Project Format](docs/PROJECT_FORMAT.md) for implementation details.
+
 ## Requirements
 
 - Node.js 20+ recommended
