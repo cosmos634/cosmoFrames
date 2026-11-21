@@ -56,6 +56,16 @@ For an element, place the same object in its `gradient` field. Two to eight vali
 Text `fontSize`, image `width` and image `height` can be animated with numeric keyframes.
 
 
+## Browser entry point
+
+The optional `render-browser` command uses a separate HTML entry page instead of the lightweight scene element list:
+
+```json
+"browser_entry": "index.html"
+```
+
+The HTML path is relative to the project JSON. The page can use HTML/CSS/JavaScript, Canvas, SVG and browser-side libraries. For deterministic rendering, expose `window.cosmoframesRender(timeSeconds, frameIndex)` or `window.renderAt(timeSeconds, frameIndex)`. The browser backend attaches to an already-running local Chromium CDP endpoint and does not launch or download a browser.
+
 ## Python effect plugins
 
 Trusted local Python effects can be applied after scene composition:
