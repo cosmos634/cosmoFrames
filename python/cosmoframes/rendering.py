@@ -8,7 +8,7 @@ from .errors import die
 from .transitions import apply_scene_transitions
 from .compositing import apply_mask, composite
 
-@lru_cache(maxsize=8)
+@lru_cache(maxsize=2)
 def _gradient_cached(size, colors, angle):
     colors = [ImageColor.getrgb(c) for c in colors]
     strip = Image.new("RGB", (256, 1))
@@ -28,7 +28,7 @@ def gradient_image(size, spec):
     colors = tuple(spec["colors"])
     return _gradient_cached(tuple(size), colors, float(spec.get("angle", 0))).copy()
 
-@lru_cache(maxsize=8)
+@lru_cache(maxsize=4)
 def load_asset(path):
     with Image.open(path) as source:
         return source.convert("RGBA")
