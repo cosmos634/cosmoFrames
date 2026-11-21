@@ -41,6 +41,10 @@ class EngineTests(unittest.TestCase):
         project = {"version": 1, "resolution": {"width": 10, "height": 10}, "scenes": [{"elements": [{"type": "circle", "animations": {"opacity": [{"time": 0, "value": 2}]}}]}]}
         with self.assertRaises(SystemExit):
             engine.validate(project)
+    def test_rejects_negative_element_end(self):
+        project = {"version": 1, "resolution": {"width": 10, "height": 10}, "scenes": [{"elements": [{"type": "circle", "end": -1}]}]}
+        with self.assertRaises(SystemExit):
+            engine.validate(project)
     def test_renders_rgb_frame(self):
         p = {"resolution": {"width": 64, "height": 64}, "fps": 24, "duration": 1,
              "background": "#000000", "scenes": [{"elements": [{"type": "circle", "x": 32, "y": 32, "radius": 10, "color": "#ffffff"}]}],
