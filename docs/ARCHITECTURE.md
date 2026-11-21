@@ -24,6 +24,10 @@ It must remain optional. Installing or using the lightweight backend must never 
 
 The planned browser backend may use HTML/CSS/JS, Canvas or SVG, with Chromium controlled through CDP where supported. It is not implemented yet and must not be treated as available functionality.
 
+## Profiling
+
+The `benchmark` CLI command measures sequential frame-render throughput, Python-tracked peak allocations, and process peak RSS where the platform exposes it. It does not encode video and is intended for comparing settings on the target device.
+
 ## Resource constraints
 
 - Do not hold the complete video in RAM.
