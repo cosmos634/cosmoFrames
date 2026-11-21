@@ -10,7 +10,7 @@ The current renderer is split into small Python modules under `python/cosmoframe
 - `rendering.py` — Pillow drawing, frame composition and FFmpeg streaming
 - `engine.py` — command-line entry point and project loading
 
-The lightweight backend is the default and only implemented backend in the current release. It renders one frame at a time and streams raw RGB bytes to FFmpeg.
+The lightweight backend remains the default. The browser backend is optional and requires a separately installed Chromium instance with CDP enabled. It renders one frame at a time and streams raw RGB bytes to FFmpeg.
 
 ## Backend boundary
 
@@ -22,7 +22,7 @@ It must remain optional. Installing or using the lightweight backend must never 
 
 ## Planned browser backend
 
-The planned browser backend may use HTML/CSS/JS, Canvas or SVG, with Chromium controlled through CDP where supported. It is not implemented yet and must not be treated as available functionality.
+The optional browser backend lives in `src/browser.ts`. It attaches to an already-running Chromium instance over CDP through the optional `playwright-core` package. A project supplies `browser_entry`, an HTML file relative to the project JSON. On each frame the renderer calls `window.cosmoframesRender(timeSeconds, frameIndex)` (or `window.renderAt`) when present, captures one PNG screenshot, and streams it into FFmpeg. This permits browser-native HTML/CSS/JS, Canvas, SVG and JS animation libraries while keeping Chromium out of the lightweight install path. The backend does not download or launch a browser automatically.
 
 ## Profiling
 
