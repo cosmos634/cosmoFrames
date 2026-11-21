@@ -170,6 +170,32 @@ class EngineTests(unittest.TestCase):
         with self.assertRaises(SystemExit):
             engine.validate(project)
 
+    def test_blend_modes_handle_transparent_source_pixels(self):
+        for mode in ("multiply", "screen", "add", "overlay"):
+            destination = Image.new("RGBA", (1, 1), (40, 80, 120, 255))
+            source = Image.new("RGBA", (1, 1), (255, 255, 255, 0))
+            composite(destination, source, mode)
+            self.assertEqual(destination.getpixel((0, 0)), (40, 80, 120, 255))
+
+    def test_blend_mode_preserves_alpha_on_empty_destination(self):
+        destination = Image.new("RGBA", (1, 1), (0, 0, 0, 0))
+        source = Image.new("RGBA", (1, 1), (200, 100, 50, 128))
+        composite(destination, source, "screen")
+        self.assertEqual(destination.getpixel((0, 0)), (200, 100, 50, 128))
+
+    def test_rejects_resolution_over_mobile_pixel_limit(self):
+        project = {"version": 1, "resolution": {"width": 4096, "height": 2160},
+                   "scenes": [{"elements": []}]}
+        with self.assertRaises(SystemExit):
+            engine.validate(project)
+
+    def test_rejects_negative_animated_font_size(self):
+        project = {"version": 1, "resolution": {"width": 10, "height": 10},
+                   "scenes": [{"elements": [{"type": "text", "text": "x",
+                   "animations": {"fontSize": [{"time": 0, "value": -2}]}}]}]}
+        with self.assertRaises(SystemExit):
+            engine.validate(project)
+
     def test_rejects_invalid_mask_config(self):
         project = {"version": 1, "resolution": {"width": 10, "height": 10},
                    "scenes": [{"elements": [{"type": "circle", "mask": {"src": ""}}]}]}
