@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "resolution": {
+    "width": 480,
+    "height": 854
+  },
+  "fps": 24,
+  "duration": 5,
+  "output": "browser-demo.mp4",
+  "browser_entry": "index.html",
+  "scenes": [
+    {
+      "elements": []
+    }
+  ]
+}
