@@ -1,13 +1,15 @@
 """Pillow drawing and streamed FFmpeg MP4 rendering."""
 import math, shutil, subprocess, sys, time
+from functools import lru_cache
 from pathlib import Path
 from PIL import Image, ImageColor, ImageDraw, ImageFont
 from .animation import value
 from .errors import die
 from .transitions import scene_opacity
 
-def gradient_image(size, spec):
-    colors = [ImageColor.getrgb(c) for c in spec["colors"]]
+@lru_cache(maxsize=8)
+def _gradient_cached(size, colors, angle):
+    colors = [ImageColor.getrgb(c) for c in colors]
     strip = Image.new("RGB", (256, 1))
     pixels = []
     for x in range(256):
@@ -17,12 +19,21 @@ def gradient_image(size, spec):
         a, b = colors[index], colors[index + 1]
         pixels.append(tuple(int(a[i] + (b[i] - a[i]) * f) for i in range(3)))
     strip.putdata(pixels)
-    angle = float(spec.get("angle", 0))
     if angle:
         strip = strip.rotate(angle, resample=Image.Resampling.BICUBIC, expand=True)
     return strip.resize(size, Image.Resampling.BICUBIC).convert("RGBA")
 
+def gradient_image(size, spec):
+    colors = tuple(spec["colors"])
+    return _gradient_cached(tuple(size), colors, float(spec.get("angle", 0))).copy()
 
+@lru_cache(maxsize=8)
+def load_asset(path):
+    with Image.open(path) as source:
+        return source.convert("RGBA")
+
+
+@lru_cache(maxsize=64)
 def get_font(size, bold=False):
     paths = ["/system/fonts/Roboto-Bold.ttf","/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"] if bold else ["/system/fonts/Roboto-Regular.ttf","/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"]
     for path in paths:
@@ -54,7 +65,7 @@ def draw(canvas, el, t, base):
         src=(base/str(el.get("src",""))).resolve()
         if not src.is_file(): die("Image asset not found: "+str(src))
         try:
-            im=Image.open(src).convert("RGBA")
+            im=load_asset(str(src))
             iw=int(float(value(el,"width",el.get("width",im.width),t))*scale); ih=int(float(value(el,"height",el.get("height",im.height),t))*scale)
             im=im.resize((max(1,iw),max(1,ih))); layer.alpha_composite(im,(int(x),int(y)))
         except Exception as e: die("Could not load image: "+str(e))
