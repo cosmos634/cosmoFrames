@@ -5,7 +5,7 @@ from pathlib import Path
 from PIL import Image, ImageColor, ImageDraw, ImageFont
 from .animation import value
 from .errors import die
-from .transitions import scene_opacity
+from .transitions import apply_scene_transitions
 from .compositing import apply_mask, composite
 
 @lru_cache(maxsize=8)
@@ -100,9 +100,8 @@ def frame(p, index):
             start, end = float(el.get("start", 0)), float(el.get("end", scene_end - scene_start))
             if start <= local_time < end:
                 draw(scene_layer, el, local_time - start, p["_base"])
-        opacity = scene_opacity(scene, local_time)
-        if opacity < 1:
-            scene_layer.putalpha(scene_layer.getchannel("A").point(lambda a: int(a * opacity)))
+        scene_duration = scene_end - scene_start
+        apply_scene_transitions(scene_layer, scene, local_time, scene_duration)
         composite(canvas, scene_layer, scene.get("blend_mode", "normal"))
     return canvas.convert("RGB")
 
