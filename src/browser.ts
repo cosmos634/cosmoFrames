@@ -124,11 +124,11 @@ async function main(): Promise<void> {
     await page.goto(pathToFileURL(entry).href, { waitUntil: "load" });
     await page.evaluate(async () => { if (document.fonts?.ready) await document.fonts.ready; });
     proc = spawn(ffmpeg, args, { stdio: ["pipe", "ignore", "inherit"] });
-    await once(proc, "spawn");
     const completion = waitForClose(proc).then(
       code => ({ code }),
       error => ({ error })
     );
+    await once(proc, "spawn");
     const frames = Math.ceil(duration * fps);
     console.log("Browser rendering %d frames at %dx%d %.2f FPS", frames, width, height, fps);
     const started = Date.now();
