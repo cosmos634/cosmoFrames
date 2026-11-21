@@ -58,6 +58,18 @@ node dist/cli.js validate my-video/project.json
 node dist/cli.js render my-video/project.json
 ```
 
+## Python effect plugins
+
+A project may list trusted Python effects in its `plugins` array. Each plugin is a local Python file that exports `apply(image, time_seconds, settings)` and returns a Pillow image with unchanged dimensions.
+
+```json
+"plugins": [
+  { "src": "../plugins/soft_focus.py", "settings": { "radius": 2, "amount": 0.12 } }
+]
+```
+
+See [plugin demo](examples/plugin-demo/project.json). **Only load plugins you trust:** Python plugins execute code with the same permissions as the renderer.
+
 ## Optional browser renderer
 
 Install the optional Node dependency and start a local Chromium instance with the DevTools Protocol enabled:
