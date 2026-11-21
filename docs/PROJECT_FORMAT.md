@@ -6,7 +6,7 @@ Supported element types: text, rectangle, circle, polygon, image. Common fields 
 
 Animations map a property name to keyframes: each keyframe has time, value, and optional easing. Easing values are linear, ease-in, ease-out, ease-in-out. Keyframe times must be strictly increasing and numeric values must be finite. Opacity values are in the 0–1 range; scale cannot be negative. Time is relative to the element start. Frame time is frame_index / fps. Colors must be valid Pillow/CSS-style color strings. Resolution dimensions are positive integers up to 8192; fps is 0.1–60 and duration is 0.01–600 seconds.
 
-Current limitations: gradients, transitions, multiple audio tracks, HTML/CSS/JS, Canvas, SVG, and GSAP are not implemented in V1. Unsupported element types fail validation.
+Current limitations: browser rendering (HTML/CSS/JS, Canvas, SVG, GSAP), masks, blend modes and advanced transition presets are not implemented. Unsupported element types fail validation.
 
 
 ## Scene timeline and transitions
@@ -34,3 +34,20 @@ The legacy `audio` field remains supported for one audio file. For multiple trac
 ```
 
 Each track is mixed into the MP4 audio stream. `start` is its offset in project seconds and `volume` is a multiplier from 0 to 4. Audio paths are resolved relative to the project JSON file. If both `audio` and `audio_tracks` are present, the legacy audio file is mixed as an additional track.
+
+
+## Gradients
+
+A linear gradient can be used as the project background or as a fill for text and vector shapes:
+
+```json
+"background_gradient": {
+  "type": "linear",
+  "colors": ["#101018", "#202060", "#20d9e8"],
+  "angle": 0
+}
+```
+
+For an element, place the same object in its `gradient` field. Two to eight valid colors are supported. The angle is in degrees. Image elements use their source image rather than a gradient fill.
+
+Text `fontSize`, image `width` and image `height` can be animated with numeric keyframes.
