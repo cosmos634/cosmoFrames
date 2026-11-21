@@ -1,6 +1,6 @@
 {
   "name": "cosmoframes",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "type": "module",
   "private": false,
   "description": "Lightweight hybrid video rendering engine for Termux and Linux",
