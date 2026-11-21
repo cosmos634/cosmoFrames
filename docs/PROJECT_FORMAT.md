@@ -56,6 +56,18 @@ For an element, place the same object in its `gradient` field. Two to eight vali
 Text `fontSize`, image `width` and image `height` can be animated with numeric keyframes.
 
 
+## Python effect plugins
+
+Trusted local Python effects can be applied after scene composition:
+
+```json
+"plugins": [
+  { "src": "../plugins/soft_focus.py", "settings": { "radius": 2, "amount": 0.12 } }
+]
+```
+
+The plugin module must define `apply(image, time_seconds, settings)` and return a Pillow image with the same dimensions. The source path is relative to the project JSON. Python plugins execute arbitrary code with the current user's permissions; only use plugins from trusted sources.
+
 ## Masks and blend modes
 
 An element can use a grayscale image as an alpha mask. White keeps the layer visible, black hides it, and gray values create partial transparency:
