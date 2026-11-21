@@ -10,11 +10,11 @@ The repository currently contains the first working-code foundation:
 - Python/Pillow frame renderer for text, rectangles, circles, polygons and images
 - Deterministic keyframe interpolation with linear, ease-in, ease-out and ease-in-out easing
 - Frame-by-frame RGB streaming into FFmpeg (no full-video frame buffer)
-- MP4 H.264 output and optional single audio input muxed as AAC
+- MP4 H.264 output with single or multi-track AAC audio
 - 480p vertical example project
 - Claude Code skill and project-format documentation
 
-Not implemented yet: Chromium/CDP browser rendering, HTML/CSS/JS execution, Canvas/SVG, gradients, transition presets, multi-track audio, caching and profiling. These are not advertised as working V1 features yet. The browser backend is optional and is not needed by the current renderer.
+Implemented: scene fade-in, linear gradients, animated text/image dimensions, multi-track audio, bounded asset caches, alpha masks, and CPU blend modes (multiply, screen, add, overlay).\n\nNot implemented yet: Chromium/CDP browser rendering, HTML/CSS/JS execution, Canvas/SVG, advanced transition presets, masks with vector paths, and GPU acceleration. The browser backend is optional and is not needed by the current renderer.
 
 See [Architecture](docs/ARCHITECTURE.md) and [Project Format](docs/PROJECT_FORMAT.md) for implementation details.
 
