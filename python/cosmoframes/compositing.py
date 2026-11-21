@@ -35,10 +35,11 @@ def composite(destination, source, mode="normal"):
     elif mode == "add":
         blended = ImageChops.add(dst, src)
     else:
-        doubled = ImageChops.add(dst, dst)
-        inverse = ImageChops.invert(ImageChops.multiply(ImageChops.invert(dst), ImageChops.invert(src)))
-        blended = ImageChops.subtract(ImageChops.add(ImageChops.multiply(dst, src), ImageChops.multiply(inverse, ImageChops.invert(dst))), Image.new("RGB", dst.size, 0))
-        blended = Image.blend(ImageChops.multiply(dst, src), ImageChops.screen(dst, src), 0.5)
+        low = ImageChops.add(ImageChops.multiply(dst, src), ImageChops.multiply(dst, src))
+        screen = ImageChops.screen(dst, src)
+        high = ImageChops.subtract(ImageChops.add(screen, screen), Image.new("RGB", dst.size, 255))
+        luminance = dst.convert("L").point(lambda value: 255 if value >= 128 else 0)
+        blended = Image.composite(high, low, luminance)
     alpha = source.getchannel("A")
     mixed = Image.composite(blended, dst, alpha)
     out = Image.alpha_composite(destination, source)
