@@ -45,6 +45,30 @@ class EngineTests(unittest.TestCase):
         project = {"version": 1, "resolution": {"width": 10, "height": 10}, "scenes": [{"elements": [{"type": "circle", "end": -1}]}]}
         with self.assertRaises(SystemExit):
             engine.validate(project)
+    def test_scene_fade_transition_blends_from_background(self):
+        p = {"resolution": {"width": 64, "height": 64}, "fps": 24, "duration": 2,
+             "background": "#000000", "scenes": [{"transition_in": {"type": "fade", "duration": 1},
+             "elements": [{"type": "rectangle", "x": 0, "y": 0, "width": 64, "height": 64, "color": "#ffffff"}]}],
+             "_base": Path(".")}
+        image = engine.frame(p, 12)
+        pixel = image.getpixel((32, 32))
+        self.assertTrue(115 <= pixel[0] <= 140, pixel)
+
+    def test_scene_start_and_end_boundaries(self):
+        p = {"resolution": {"width": 64, "height": 64}, "fps": 24, "duration": 3,
+             "background": "#000000", "scenes": [{"start": 1, "end": 2,
+             "elements": [{"type": "rectangle", "x": 0, "y": 0, "width": 64, "height": 64, "color": "#ffffff"}]}],
+             "_base": Path(".")}
+        self.assertEqual(engine.frame(p, 0).getpixel((32, 32)), (0, 0, 0))
+        self.assertEqual(engine.frame(p, 48).getpixel((32, 32)), (0, 0, 0))
+        self.assertEqual(engine.frame(p, 24).getpixel((32, 32)), (255, 255, 255))
+
+    def test_rejects_unsupported_scene_transition(self):
+        project = {"version": 1, "resolution": {"width": 10, "height": 10},
+                   "scenes": [{"transition_in": {"type": "wipe", "duration": 1}, "elements": []}]}
+        with self.assertRaises(SystemExit):
+            engine.validate(project)
+
     def test_renders_rgb_frame(self):
         p = {"resolution": {"width": 64, "height": 64}, "fps": 24, "duration": 1,
              "background": "#000000", "scenes": [{"elements": [{"type": "circle", "x": 32, "y": 32, "radius": 10, "color": "#ffffff"}]}],
