@@ -5,7 +5,7 @@ CosmoFrames 1.1 is a Termux-first video engine with two independent backends:
 - Lightweight: Python/Pillow CPU rendering, one frame at a time, streamed to FFmpeg.
 - Optional browser: TypeScript + playwright-core, attaches to an already-running Chromium through CDP and streams PNG screenshots to FFmpeg.
 
-The lightweight backend is the default. Chromium is never required for normal install, validation, preview or rendering.
+The lightweight backend is the default. Chromium is never required for normal install, validation, preview or lightweight rendering.
 
 ## Rules
 - Never buffer a full video in RAM.
