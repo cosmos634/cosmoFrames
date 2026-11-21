@@ -2,11 +2,11 @@
 
 A lightweight, CPU-first video rendering engine for Android Termux and Linux.
 
-## V1 status
+## V1.1 status
 
 The repository currently contains the first working-code foundation:
 - TypeScript CLI commands: info, init, validate, preview, render, render-browser, benchmark
-- Modular Python package: validation, keyframe animation, Pillow drawing, FFmpeg export and CLI entry point
+- Modular Python package: validation, animation, compositing, transitions, trusted effect plugins, profiling and FFmpeg export
 - Python/Pillow frame renderer for text, rectangles, circles, polygons and images
 - Deterministic keyframe interpolation with linear, ease-in, ease-out and ease-in-out easing
 - Frame-by-frame RGB streaming into FFmpeg (no full-video frame buffer)
