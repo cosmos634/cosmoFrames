@@ -1,5 +1,8 @@
 import importlib.util
+import tempfile
 import unittest
+from PIL import Image
+from cosmoframes.compositing import composite
 from pathlib import Path
 
 ENGINE = Path(__file__).resolve().parents[1] / "python" / "engine.py"
@@ -106,6 +109,44 @@ class EngineTests(unittest.TestCase):
             {"elements": [{"type": "text", "text": "Hi", "fontSize": 12,
              "animations": {"fontSize": [{"time": 0, "value": 12}, {"time": 1, "value": 30}]}}]}]}
         engine.validate(project)
+
+    def test_alpha_mask_hides_part_of_layer(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            mask = Image.new("L", (64, 32), 0)
+            for x in range(32, 64):
+                for y in range(32):
+                    mask.putpixel((x, y), 255)
+            mask.save(base / "mask.png")
+            p = {"resolution": {"width": 64, "height": 32}, "fps": 24, "duration": 1,
+                 "background": "#000000", "scenes": [{"elements": [
+                     {"type": "rectangle", "x": 0, "y": 0, "width": 64, "height": 32,
+                      "color": "#ffffff", "mask": {"src": "mask.png"}}
+                 ]}], "_base": base}
+            image = engine.frame(p, 0)
+            self.assertEqual(image.getpixel((10, 16)), (0, 0, 0))
+            self.assertEqual(image.getpixel((50, 16)), (255, 255, 255))
+
+    def test_multiply_blend_mode(self):
+        destination = Image.new("RGBA", (2, 2), (128, 128, 128, 255))
+        source = Image.new("RGBA", (2, 2), (128, 0, 255, 255))
+        composite(destination, source, "multiply")
+        pixel = destination.getpixel((0, 0))
+        self.assertTrue(63 <= pixel[0] <= 65, pixel)
+        self.assertEqual(pixel[1], 0)
+        self.assertEqual(pixel[2], 128)
+
+    def test_rejects_unknown_blend_mode(self):
+        project = {"version": 1, "resolution": {"width": 10, "height": 10},
+                   "scenes": [{"elements": [{"type": "circle", "blend_mode": "burn"}]}]}
+        with self.assertRaises(SystemExit):
+            engine.validate(project)
+
+    def test_rejects_invalid_mask_config(self):
+        project = {"version": 1, "resolution": {"width": 10, "height": 10},
+                   "scenes": [{"elements": [{"type": "circle", "mask": {"src": ""}}]}]}
+        with self.assertRaises(SystemExit):
+            engine.validate(project)
 
     def test_renders_rgb_frame(self):
         p = {"resolution": {"width": 64, "height": 64}, "fps": 24, "duration": 1,
