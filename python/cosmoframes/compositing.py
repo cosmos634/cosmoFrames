@@ -56,5 +56,7 @@ def composite(destination, source, mode="normal"):
     mix_mask = ImageChops.lighter(src_alpha, ImageChops.invert(dst_rgba.getchannel("A")))
     mixed_rgb = Image.composite(blended, dst_rgb, mix_mask)
     result = Image.alpha_composite(dst_rgba, src_rgba)
-    result.paste(mixed_rgb, (0, 0))
+    result_rgb = result.convert("RGB")
+    result_rgb.paste(mixed_rgb, (0, 0))
+    result = Image.merge("RGBA", (*result_rgb.split(), result.getchannel("A")))
     destination.paste(result)
