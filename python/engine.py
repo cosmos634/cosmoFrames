@@ -2,7 +2,7 @@
 """CosmoFrames V1 deterministic Pillow renderer with streamed FFmpeg export."""
 import json, math, shutil, subprocess, sys, time
 from pathlib import Path
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageColor, ImageDraw, ImageFont
 
 VERSION = "1.0.0"
 TYPES = {"text", "rectangle", "circle", "polygon", "image"}
@@ -19,6 +19,13 @@ def validate(p):
         if maximum is not None and v > maximum: die(label + " must be <= " + str(maximum) + ".", 2)
     if not isinstance(p, dict): die("Project root must be an object.", 2)
     if p.get("version") != 1: die("version must equal 1.", 2)
+    for key in ("output", "audio"):
+        if key in p and (not isinstance(p[key], str) or not p[key].strip()): die(key + " must be a non-empty path string.", 2)
+    def color(v, label):
+        if not isinstance(v, str): die(label + " must be a CSS-style color string.", 2)
+        try: ImageColor.getcolor(v, "RGBA")
+        except ValueError: die(label + " is not a recognized color: " + v, 2)
+    color(p.get("background", "#101018"), "background")
     r = p.get("resolution")
     if not isinstance(r, dict): die("resolution must be an object.", 2)
     for key in ("width", "height"):
@@ -39,6 +46,8 @@ def validate(p):
                 if prop in el: number(el[prop], label + "." + prop, 0 if prop in ("start", "fontSize", "radius", "width", "height", "scale") else None)
             if "start" in el and "end" in el and el["end"] <= el["start"]: die(label + ".end must be greater than start.", 2)
             if el["type"] == "text" and not isinstance(el.get("text", ""), str): die(label + ".text must be a string.", 2)
+            color(el.get("color", el.get("fill", "#ffffff")), label + ".color")
+            if "strokeColor" in el: color(el["strokeColor"], label + ".strokeColor")
             if el["type"] == "image" and (not isinstance(el.get("src"), str) or not el["src"].strip()): die(label + ".src must be a non-empty path.", 2)
             if el["type"] == "polygon":
                 pts = el.get("points")
@@ -56,6 +65,8 @@ def validate(p):
                     if key["time"] <= previous: die(label + ".animations." + prop + " keyframe times must be strictly increasing.", 2)
                     previous = key["time"]
                     number(key["value"], label + ".animations." + prop + ".value")
+                    if prop == "opacity" and not 0 <= key["value"] <= 1: die(label + ".animations.opacity values must be between 0 and 1.", 2)
+                    if prop == "scale" and key["value"] < 0: die(label + ".animations.scale values cannot be negative.", 2)
                     if key.get("easing", "linear") not in easings: die(label + ".animations." + prop + " has an unsupported easing.", 2)
             if "opacity" in el: number(el["opacity"], label + ".opacity", 0, 1)
             if el.get("anchor", "lt") not in {"lt", "mt", "rt", "lm", "mm", "rm", "lb", "mb", "rb"}:
