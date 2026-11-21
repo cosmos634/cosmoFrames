@@ -31,3 +31,8 @@ The planned browser backend may use HTML/CSS/JS, Canvas or SVG, with Chromium co
 - Keep FFmpeg as a streaming encoder process.
 - Make temporary files explicit and clean them up.
 - Keep browser dependencies out of the lightweight install path.
+
+
+## Renderer caches
+
+The lightweight renderer keeps bounded in-process caches for decoded source images, font objects and generated gradient surfaces. These caches avoid reopening and rebuilding identical assets on every frame. The caches are deliberately bounded to prevent unbounded memory growth on mobile devices; a new process starts with empty caches.
