@@ -6,6 +6,7 @@ from PIL import Image, ImageColor, ImageDraw, ImageFont
 from .animation import value
 from .errors import die
 from .transitions import scene_opacity
+from .compositing import apply_mask, composite
 
 @lru_cache(maxsize=8)
 def _gradient_cached(size, colors, angle):
@@ -79,7 +80,11 @@ def draw(canvas, el, t, base):
             center = ((bounds[0] + bounds[2]) / 2, (bounds[1] + bounds[3]) / 2)
             layer = layer.rotate(-rotation, resample=Image.Resampling.BICUBIC, center=center)
     if opacity<1: layer.putalpha(layer.getchannel("A").point(lambda a:int(a*opacity)))
-    canvas.alpha_composite(layer)
+    try:
+        layer = apply_mask(layer, el.get("mask"), base)
+        composite(canvas, layer, el.get("blend_mode", "normal"))
+    except ValueError as exc:
+        die(str(exc))
 
 def frame(p, index):
     w,h=p["resolution"]["width"],p["resolution"]["height"]; t=index/float(p.get("fps",30))
@@ -98,7 +103,7 @@ def frame(p, index):
         opacity = scene_opacity(scene, local_time)
         if opacity < 1:
             scene_layer.putalpha(scene_layer.getchannel("A").point(lambda a: int(a * opacity)))
-        canvas.alpha_composite(scene_layer)
+        composite(canvas, scene_layer, scene.get("blend_mode", "normal"))
     return canvas.convert("RGB")
 
 def render(p,path):
