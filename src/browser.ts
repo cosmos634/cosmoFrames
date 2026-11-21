@@ -60,6 +60,15 @@ async function main(): Promise<void> {
   mkdirSync(dirname(output), { recursive: true });
   const tracks = [...(project.audio_tracks || [])];
   if (project.audio) tracks.unshift({ src: project.audio, start: 0, volume: 1 });
+  for (let i = 0; i < tracks.length; i++) {
+    const track = tracks[i];
+    if (!track || typeof track.src !== "string" || !track.src.trim())
+      fail("audio_tracks[" + i + "].src must be a non-empty path.");
+    if (track.start !== undefined && (!Number.isFinite(track.start) || track.start < 0))
+      fail("audio_tracks[" + i + "].start must be a non-negative number.");
+    if (track.volume !== undefined && (!Number.isFinite(track.volume) || track.volume < 0 || track.volume > 4))
+      fail("audio_tracks[" + i + "].volume must be between 0 and 4.");
+  }
   const args = ["-y", "-loglevel", "error", "-f", "image2pipe", "-vcodec", "png",
     "-framerate", String(fps), "-i", "-"];
   const filters: string[] = [];
