@@ -76,6 +76,25 @@
       "type": "string",
       "minLength": 1,
       "description": "Optional HTML entry point used by the render-browser command; path is relative to the project file."
+    },
+    "plugins": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "src"
+        ],
+        "properties": {
+          "src": {
+            "type": "string",
+            "minLength": 1
+          },
+          "settings": {
+            "type": "object"
+          }
+        },
+        "additionalProperties": false
+      }
     }
   },
   "$defs": {
