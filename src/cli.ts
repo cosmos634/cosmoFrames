@@ -15,13 +15,14 @@ function runPython(action: string, project?: string, extra: string[] = []): void
   process.exit(result.status ?? 1);
 }
 function help(): void {
-  console.log("CosmoFrames 1.0\nUsage:\n  cosmoframes info\n  cosmoframes init <name>\n  cosmoframes validate <project.json>\n  cosmoframes preview <project.json> [--time seconds]\n  cosmoframes render <project.json>\n\nSet COSMOFRAMES_PYTHON to choose the Python executable.");
+  console.log("CosmoFrames 1.0\nUsage:\n  cosmoframes info\n  cosmoframes init <name>\n  cosmoframes validate <project.json>\n  cosmoframes preview <project.json> [--time seconds]\n  cosmoframes render <project.json>\n  cosmoframes benchmark <project.json> [--frames N]\n\nSet COSMOFRAMES_PYTHON to choose the Python executable.");
 }
 switch (command) {
   case "info": runPython("info"); break;
   case "init": if (!args[1]) { console.error("Usage: cosmoframes init <name>"); process.exit(2); } runPython("init", undefined, [args[1]]); break;
   case "validate":
-  case "render": if (!args[1]) { console.error("Usage: cosmoframes " + command + " <project.json>"); process.exit(2); } runPython(command, args[1]); break;
+  case "render":
+  case "benchmark": if (!args[1]) { console.error("Usage: cosmoframes " + command + " <project.json>"); process.exit(2); } runPython(command, args[1], args.slice(2)); break;
   case "preview": if (!args[1]) { console.error("Usage: cosmoframes preview <project.json> [--time seconds]"); process.exit(2); } runPython("preview", args[1], args.slice(2)); break;
   case "help": case "--help": case "-h": help(); break;
   default: console.error("Unknown command: " + command); help(); process.exit(2);
