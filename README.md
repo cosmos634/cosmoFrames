@@ -14,7 +14,7 @@ The repository currently contains the first working-code foundation:
 - 480p vertical example project
 - Claude Code skill and project-format documentation
 
-Implemented: scene fade-in, linear gradients, animated text/image dimensions, multi-track audio, bounded asset caches, alpha masks, and CPU blend modes (multiply, screen, add, overlay).\n\nNot implemented yet: Chromium/CDP browser rendering, HTML/CSS/JS execution, Canvas/SVG, advanced transition presets, masks with vector paths, and GPU acceleration. The browser backend is optional and is not needed by the current renderer.
+Implemented: fade and directional wipe scene transitions (in/out), linear gradients, animated text/image dimensions, multi-track audio, bounded asset caches, alpha masks, and CPU blend modes (multiply, screen, add, overlay).\n\nNot implemented yet: Chromium/CDP browser rendering, HTML/CSS/JS execution, Canvas/SVG, advanced transition presets, masks with vector paths, and GPU acceleration. The browser backend is optional and is not needed by the current renderer.
 
 See [Architecture](docs/ARCHITECTURE.md) and [Project Format](docs/PROJECT_FORMAT.md) for implementation details.
 
