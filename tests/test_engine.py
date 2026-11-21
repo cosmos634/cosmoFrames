@@ -8,6 +8,7 @@ import sys
 PYTHON_DIR = Path(__file__).resolve().parents[1] / "python"
 sys.path.insert(0, str(PYTHON_DIR))
 from cosmoframes.compositing import composite
+from cosmoframes.plugins import apply_plugins
 
 ENGINE = PYTHON_DIR / "engine.py"
 spec = importlib.util.spec_from_file_location("cosmoframes_engine", ENGINE)
@@ -195,6 +196,18 @@ class EngineTests(unittest.TestCase):
                    "animations": {"fontSize": [{"time": 0, "value": -2}]}}]}]}
         with self.assertRaises(SystemExit):
             engine.validate(project)
+
+    def test_python_effect_plugin_contract(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            plugin = base / "effect.py"
+            plugin.write_text(
+                "from PIL import Image\ndef apply(image, time_seconds, settings):\n"
+                "    return Image.new('RGBA', image.size, (int(time_seconds * 10), 20, 30, 255))\n",
+                encoding="utf-8")
+            source = Image.new("RGBA", (4, 4), (0, 0, 0, 255))
+            output = apply_plugins(source, [{"src": "effect.py", "settings": {}}], base, 2.5)
+            self.assertEqual(output.getpixel((0, 0)), (25, 20, 30, 255))
 
     def test_rejects_invalid_mask_config(self):
         project = {"version": 1, "resolution": {"width": 10, "height": 10},
