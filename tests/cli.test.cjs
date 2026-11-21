@@ -50,6 +50,12 @@ test("CLI benchmark reports render performance", () => {
   assert.match(result.stdout, /peak RSS|Python-tracked peak/);
 });
 
+test("CLI exposes optional browser renderer command", () => {
+  const result = run(["render-browser", path.join(root, "missing-browser-project.json")]);
+  assert.equal(result.status, 1);
+  assert.match(result.stderr, /Project file not found/);
+});
+
 test("CLI rejects unknown commands", () => {
   const result = run(["not-a-command"]);
   assert.equal(result.status, 2);
