@@ -70,6 +70,10 @@ async function main(): Promise<void> {
   const ffmpeg = process.env.COSMOFRAMES_FFMPEG || "ffmpeg";
   const output = resolve(base, project.output || "browser-output.mp4");
   mkdirSync(dirname(output), { recursive: true });
+  if (project.audio !== undefined && (typeof project.audio !== "string" || !project.audio.trim()))
+    fail("audio must be a non-empty path string.");
+  if (project.audio_tracks !== undefined && !Array.isArray(project.audio_tracks))
+    fail("audio_tracks must be an array.");
   const tracks = [...(project.audio_tracks || [])];
   if (project.audio) tracks.unshift({ src: project.audio, start: 0, volume: 1 });
   for (let i = 0; i < tracks.length; i++) {
