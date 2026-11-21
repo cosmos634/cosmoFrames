@@ -46,6 +46,4 @@ def main():
     elif action=="render": render(p,path)
     else: die("Unknown action: "+action,2)
 
-if __name__=="__main__": main()
-
 if __name__ == "__main__": main()
