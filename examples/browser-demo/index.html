@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CosmoFrames Browser Demo</title>
+  <style>
+    * { box-sizing: border-box; }
+    html, body { margin: 0; width: 100%; height: 100%; overflow: hidden; }
+    body { display: grid; place-items: center; color: #fff; background: radial-gradient(circle at 50% 38%, #25245c, #090b16 72%); font-family: Arial, sans-serif; }
+    main { width: 100%; height: 100%; display: grid; place-items: center; position: relative; }
+    .orb { width: 24vmin; height: 24vmin; border-radius: 50%; background: linear-gradient(135deg,#23d8e8,#8b5cf6); box-shadow: 0 0 8vmin #23d8e866; transform: scale(.2); }
+    h1 { position: absolute; top: 62%; margin: 0; font-size: 8vmin; letter-spacing: .12em; opacity: 0; }
+    p { position: absolute; top: 73%; color: #aab3ca; font-size: 3vmin; letter-spacing: .18em; opacity: 0; }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="orb" id="orb"></div>
+    <h1 id="title">COSMOFRAMES</h1>
+    <p id="subtitle">OPTIONAL BROWSER RENDERER</p>
+  </main>
+  <script>
+    const orb = document.querySelector("#orb");
+    const title = document.querySelector("#title");
+    const subtitle = document.querySelector("#subtitle");
+    window.cosmoframesRender = (time) => {
+      const t = Math.max(0, Math.min(1, time / 1.4));
+      const eased = 1 - Math.pow(1 - t, 3);
+      orb.style.transform = "scale(" + (.2 + eased * .8) + ") rotate(" + (time * 18) + "deg)";
+      title.style.opacity = String(Math.max(0, Math.min(1, (time - .45) / .7)));
+      subtitle.style.opacity = String(Math.max(0, Math.min(1, (time - .9) / .6)));
+    };
+  </script>
+</body>
+</html>
