@@ -1,0 +1,1 @@
+{"name":"cosmoframes","version":"1.0.0","private":false,"description":"Lightweight hybrid video rendering engine for Termux and Linux","license":"MIT","bin":{"cosmoframes":"dist/cli.js"},"scripts":{"build":"tsc -p tsconfig.json","test":"npm run build && node --test tests/*.test.cjs"},"devDependencies":{"@types/node":"^22.10.0","typescript":"^5.7.2"}}
