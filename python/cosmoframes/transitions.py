@@ -18,15 +18,17 @@ def _mask(size, kind, progress):
     if kind == "fade":
         mask.paste(int(round(progress * 255)), (0, 0, width, height))
     elif kind == "wipe_left":
-        draw.rectangle((0, 0, int(round(width * progress)), height), fill=255)
+        edge = int(round(width * progress))
+        if edge > 0: draw.rectangle((0, 0, edge - 1, height - 1), fill=255)
     elif kind == "wipe_right":
         edge = int(round(width * (1 - progress)))
-        draw.rectangle((edge, 0, width, height), fill=255)
+        if edge < width: draw.rectangle((edge, 0, width - 1, height - 1), fill=255)
     elif kind == "wipe_up":
-        draw.rectangle((0, 0, width, int(round(height * progress))), fill=255)
+        edge = int(round(height * progress))
+        if edge > 0: draw.rectangle((0, 0, width - 1, edge - 1), fill=255)
     elif kind == "wipe_down":
         edge = int(round(height * (1 - progress)))
-        draw.rectangle((0, edge, width, height), fill=255)
+        if edge < height: draw.rectangle((0, edge, width - 1, height - 1), fill=255)
     return mask
 
 
