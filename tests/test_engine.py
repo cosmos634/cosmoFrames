@@ -82,6 +82,31 @@ class EngineTests(unittest.TestCase):
         with self.assertRaises(SystemExit):
             engine.validate(project)
 
+    def test_element_gradient_fill(self):
+        p = {"resolution": {"width": 64, "height": 32}, "fps": 24, "duration": 1,
+             "background": "#000000", "scenes": [{"elements": [
+                 {"type": "rectangle", "x": 0, "y": 0, "width": 64, "height": 32,
+                  "gradient": {"type": "linear", "colors": ["#ff0000", "#0000ff"]}}
+             ]}], "_base": Path(".")}
+        image = engine.frame(p, 0)
+        left = image.getpixel((3, 16))
+        right = image.getpixel((60, 16))
+        self.assertGreater(left[0], left[2])
+        self.assertGreater(right[2], right[0])
+
+    def test_background_gradient(self):
+        p = {"resolution": {"width": 64, "height": 32}, "fps": 24, "duration": 1,
+             "background_gradient": {"type": "linear", "colors": ["#000000", "#ffffff"]},
+             "scenes": [{"elements": []}], "_base": Path(".")}
+        image = engine.frame(p, 0)
+        self.assertNotEqual(image.getpixel((0, 10)), image.getpixel((63, 10)))
+
+    def test_validates_animated_font_size(self):
+        project = {"version": 1, "resolution": {"width": 64, "height": 64}, "scenes": [
+            {"elements": [{"type": "text", "text": "Hi", "fontSize": 12,
+             "animations": {"fontSize": [{"time": 0, "value": 12}, {"time": 1, "value": 30}]}}]}]}
+        engine.validate(project)
+
     def test_renders_rgb_frame(self):
         p = {"resolution": {"width": 64, "height": 64}, "fps": 24, "duration": 1,
              "background": "#000000", "scenes": [{"elements": [{"type": "circle", "x": 32, "y": 32, "radius": 10, "color": "#ffffff"}]}],
