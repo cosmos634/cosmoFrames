@@ -45,6 +45,7 @@ node dist/cli.js info
 node dist/cli.js validate examples/vertical-demo/project.json
 node dist/cli.js preview examples/vertical-demo/project.json --time 1.5
 node dist/cli.js render examples/vertical-demo/project.json
+node dist/cli.js benchmark examples/vertical-demo/project.json --frames 24
 ```
 
 The rendered file is written to examples/vertical-demo/cosmoframes-demo.mp4.
@@ -55,6 +56,14 @@ Frame dimensions are capped at 8.3 megapixels per project to reduce out-of-memor
 node dist/cli.js init my-video
 node dist/cli.js validate my-video/project.json
 node dist/cli.js render my-video/project.json
+```
+
+## Profiling
+
+Use `benchmark` to measure frame-render speed and memory on the current device. It renders frames without encoding an MP4; by default it benchmarks up to 120 frames.
+
+```sh
+node dist/cli.js benchmark project.json --frames 120
 ```
 
 ## Audio
