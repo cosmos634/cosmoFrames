@@ -1,5 +1,5 @@
 """Example optional effect plugin: subtle soft-focus blend."""
-from PIL import ImageFilter
+from PIL import Image, ImageFilter
 
 
 def apply(image, time_seconds, settings):
