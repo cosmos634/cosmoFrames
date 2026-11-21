@@ -72,12 +72,28 @@ def render(p,path):
     count=math.ceil(float(p.get("duration",5))*fps)
     out=(path.parent/p.get("output","output.mp4")).resolve(); out.parent.mkdir(parents=True,exist_ok=True)
     cmd=[ff,"-y","-loglevel","error","-f","rawvideo","-pixel_format","rgb24","-video_size",str(w)+"x"+str(h),"-framerate",str(fps),"-i","-"]
-    audio=p.get("audio")
-    if audio:
-        ap=(path.parent/audio).resolve()
-        if not ap.is_file(): die("Audio file not found: "+str(ap))
-        cmd += ["-i",str(ap),"-map","0:v:0","-map","1:a:0","-c:a","aac","-shortest"]
-    else: cmd += ["-an"]
+    tracks = list(p.get("audio_tracks", []))
+    if p.get("audio"):
+        tracks.insert(0, {"src": p["audio"], "start": 0, "volume": 1})
+    if tracks:
+        filters = []
+        labels = []
+        for i, track in enumerate(tracks):
+            ap = (path.parent / track["src"]).resolve()
+            if not ap.is_file(): die("Audio file not found: " + str(ap))
+            cmd += ["-i", str(ap)]
+            delay = int(float(track.get("start", 0)) * 1000)
+            volume = float(track.get("volume", 1))
+            label = "a%d" % i
+            filters.append("[%d:a]atrim=duration=%s,asetpts=PTS-STARTPTS,adelay=%d:all=1,volume=%s[%s]" % (i + 1, p.get("duration", 5), delay, volume, label))
+            labels.append("[%s]" % label)
+        if len(labels) == 1:
+            filters.append("%sanull[aout]" % labels[0])
+        else:
+            filters.append("%samix=inputs=%d:duration=longest:dropout_transition=0[aout]" % ("".join(labels), len(labels)))
+        cmd += ["-filter_complex", ";".join(filters), "-map", "0:v:0", "-map", "[aout]", "-c:a", "aac"]
+    else:
+        cmd += ["-an"]
     cmd += ["-c:v","libx264","-preset",p.get("preset","ultrafast"),"-pix_fmt","yuv420p","-movflags","+faststart","-t",str(p.get("duration",5)),str(out)]
     print("Rendering %d frames at %dx%d %.2f FPS" % (count,w,h,fps))
     proc=subprocess.Popen(cmd,stdin=subprocess.PIPE)
