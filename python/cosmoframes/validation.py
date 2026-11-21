@@ -44,6 +44,8 @@ def validate(p):
     for key in ("width", "height"):
         if isinstance(r.get(key), bool) or not isinstance(r.get(key), int) or not 1 <= r[key] <= 8192:
             die("resolution." + key + " must be an integer from 1 to 8192.", 2)
+    if r["width"] * r["height"] > 8_294_400:
+        die("resolution exceeds the 8.3-megapixel safety limit. Reduce width or height for reliable rendering.", 2)
     number(p.get("fps", 30), "fps", 0.1, 60)
     number(p.get("duration", 5), "duration", 0.01, 600)
     if not isinstance(p.get("scenes"), list) or not p["scenes"]: die("scenes must be a non-empty array.", 2)
@@ -104,6 +106,8 @@ def validate(p):
                     if key["time"] <= previous: die(label + ".animations." + prop + " keyframe times must be strictly increasing.", 2)
                     previous = key["time"]
                     number(key["value"], label + ".animations." + prop + ".value")
+                    if prop in {"width", "height", "fontSize"} and key["value"] < 0:
+                        die(label + ".animations." + prop + " values cannot be negative.", 2)
                     if prop == "opacity" and not 0 <= key["value"] <= 1: die(label + ".animations.opacity values must be between 0 and 1.", 2)
                     if prop == "scale" and key["value"] < 0: die(label + ".animations.scale values cannot be negative.", 2)
                     if key.get("easing", "linear") not in easings: die(label + ".animations." + prop + " has an unsupported easing.", 2)
