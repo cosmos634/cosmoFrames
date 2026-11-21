@@ -14,7 +14,7 @@ The repository currently contains the first working-code foundation:
 - 480p vertical example project
 - Claude Code skill and project-format documentation
 
-Implemented: fade and directional wipe scene transitions (in/out), linear gradients, animated text/image dimensions, multi-track audio, bounded asset caches, alpha masks, and CPU blend modes (multiply, screen, add, overlay).\n\nNot implemented yet: Chromium/CDP browser rendering, HTML/CSS/JS execution, Canvas/SVG, advanced transition presets, masks with vector paths, and GPU acceleration. The browser backend is optional and is not needed by the current renderer.
+Implemented: fade and directional wipe scene transitions (in/out), linear gradients, animated text/image dimensions, multi-track audio, bounded asset caches, alpha masks, and CPU blend modes (multiply, screen, add, overlay).\n\nThe optional Chromium/CDP backend is available through `render-browser`. It renders an HTML entry page using a deterministic `window.cosmoframesRender(timeSeconds, frameIndex)` hook and streams PNG frames into FFmpeg. It supports browser-native HTML/CSS/JS, Canvas, SVG and libraries such as GSAP when those are included by the page. Vector-path masks and GPU acceleration are not implemented.
 
 See [Architecture](docs/ARCHITECTURE.md) and [Project Format](docs/PROJECT_FORMAT.md) for implementation details.
 
@@ -57,6 +57,18 @@ node dist/cli.js init my-video
 node dist/cli.js validate my-video/project.json
 node dist/cli.js render my-video/project.json
 ```
+
+## Optional browser renderer
+
+Install the optional Node dependency and start a local Chromium instance with the DevTools Protocol enabled:
+
+```sh
+npm install playwright-core
+chromium --remote-debugging-port=9222 --user-data-dir=/tmp/cosmoframes-chrome
+node dist/cli.js render-browser examples/browser-demo/project.json
+```
+
+Keep the CDP port bound to localhost; it grants control over the browser. Set `COSMOFRAMES_CDP_URL` if Chromium listens on another local endpoint. Browser rendering is optional and does not affect the Pillow renderer or its install path. See [browser demo](examples/browser-demo/project.json).
 
 ## Profiling
 
