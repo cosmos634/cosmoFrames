@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /** Optional Chromium/CDP renderer. Requires playwright-core and a running CDP browser. */
 import { existsSync, readFileSync, mkdirSync, statSync } from "node:fs";
-import { resolve, dirname, basename, extname } from "node:path";
+import { resolve, dirname } from "node:path";
 import { pathToFileURL } from "node:url";
 import { spawn, type ChildProcessByStdio } from "node:child_process";
 import type { Writable } from "node:stream";
@@ -108,7 +108,10 @@ async function main(): Promise<void> {
     await page.goto(pathToFileURL(entry).href, { waitUntil: "load" });
     await page.evaluate(async () => { if (document.fonts?.ready) await document.fonts.ready; });
     proc = spawn(ffmpeg, args, { stdio: ["pipe", "ignore", "inherit"] });
-    const completion = waitForClose(proc);
+    const completion = waitForClose(proc).then(
+      code => ({ code }),
+      error => ({ error })
+    );
     const frames = Math.ceil(duration * fps);
     console.log("Browser rendering %d frames at %dx%d %.2f FPS", frames, width, height, fps);
     const started = Date.now();
@@ -124,8 +127,9 @@ async function main(): Promise<void> {
         console.log("Progress: %d/%d frames", index, frames);
     }
     proc.stdin.end();
-    const code = await completion;
-    if (code !== 0) fail("FFmpeg exited with code " + code);
+    const finished = await completion;
+    if ("error" in finished) fail("FFmpeg process failed: " + String(finished.error));
+    if (finished.code !== 0) fail("FFmpeg exited with code " + finished.code);
     if (!existsSync(output)) fail("MP4 output was not created.");
     console.log("Created %s (%d bytes) in %.1fs", output,
       statSync(output).size, (Date.now() - started) / 1000);
