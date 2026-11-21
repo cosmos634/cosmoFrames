@@ -32,6 +32,14 @@ def validate(p):
     easings = {"linear", "ease-in", "ease-out", "ease-in-out"}
     for si, scene in enumerate(p["scenes"]):
         if not isinstance(scene, dict) or not isinstance(scene.get("elements", []), list): die("Invalid scene at index " + str(si), 2)
+        for prop in ("start", "end"):
+            if prop in scene: number(scene[prop], "scenes[%d].%s" % (si, prop), 0)
+        if "end" in scene and scene["end"] <= scene.get("start", 0): die("scenes[%d].end must be greater than start." % si, 2)
+        transition = scene.get("transition_in")
+        if transition is not None:
+            if not isinstance(transition, dict): die("scenes[%d].transition_in must be an object." % si, 2)
+            if transition.get("type", "fade") != "fade": die("Only fade scene transitions are supported in this version.", 2)
+            number(transition.get("duration", 0), "scenes[%d].transition_in.duration" % si, 0, 30)
         for ei, el in enumerate(scene.get("elements", [])):
             label = "scenes[%d].elements[%d]" % (si, ei)
             if not isinstance(el, dict) or el.get("type") not in TYPES:
