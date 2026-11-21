@@ -171,6 +171,14 @@ class EngineTests(unittest.TestCase):
         with self.assertRaises(SystemExit):
             engine.validate(project)
 
+    def test_all_blend_mode_formulas(self):
+        destination = Image.new("RGBA", (1, 1), (128, 128, 128, 255))
+        expected = {"multiply": 64, "screen": 192, "add": 255, "overlay": 129}
+        for mode, channel in expected.items():
+            result = destination.copy()
+            composite(result, Image.new("RGBA", (1, 1), (128, 128, 128, 255)), mode)
+            self.assertAlmostEqual(result.getpixel((0, 0))[0], channel, delta=1, msg=mode)
+
     def test_blend_modes_handle_transparent_source_pixels(self):
         for mode in ("multiply", "screen", "add", "overlay"):
             destination = Image.new("RGBA", (1, 1), (40, 80, 120, 255))
