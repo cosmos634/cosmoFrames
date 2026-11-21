@@ -37,7 +37,7 @@ def composite(destination, source, mode="normal"):
     else:
         low = ImageChops.add(ImageChops.multiply(dst, src), ImageChops.multiply(dst, src))
         screen = ImageChops.screen(dst, src)
-        high = ImageChops.subtract(ImageChops.add(screen, screen), Image.new("RGB", dst.size, 255))
+        high = ImageChops.add(screen, screen, scale=1, offset=-255)
         luminance = dst.convert("L").point(lambda value: 255 if value >= 128 else 0)
         blended = Image.composite(high, low, luminance)
     alpha = source.getchannel("A")
