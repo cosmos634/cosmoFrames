@@ -48,11 +48,13 @@ def validate(p):
     if not isinstance(p.get("scenes"), list) or not p["scenes"]: die("scenes must be a non-empty array.", 2)
     allowed_animations = {"x", "y", "width", "height", "fontSize", "scale", "opacity", "rotation"}
     easings = {"linear", "ease-in", "ease-out", "ease-in-out"}
+    blend_modes = {"normal", "multiply", "screen", "add", "overlay"}
     for si, scene in enumerate(p["scenes"]):
         if not isinstance(scene, dict) or not isinstance(scene.get("elements", []), list): die("Invalid scene at index " + str(si), 2)
         for prop in ("start", "end"):
             if prop in scene: number(scene[prop], "scenes[%d].%s" % (si, prop), 0)
         if "end" in scene and scene["end"] <= scene.get("start", 0): die("scenes[%d].end must be greater than start." % si, 2)
+        if scene.get("blend_mode", "normal") not in blend_modes: die("scenes[%d].blend_mode is unsupported." % si, 2)
         transition = scene.get("transition_in")
         if transition is not None:
             if not isinstance(transition, dict): die("scenes[%d].transition_in must be an object." % si, 2)
@@ -68,6 +70,11 @@ def validate(p):
             if el["type"] == "text" and not isinstance(el.get("text", ""), str): die(label + ".text must be a string.", 2)
             color(el.get("color", el.get("fill", "#ffffff")), label + ".color")
             if "strokeColor" in el: color(el["strokeColor"], label + ".strokeColor")
+            if el.get("blend_mode", "normal") not in blend_modes: die(label + ".blend_mode is unsupported.", 2)
+            if "mask" in el:
+                mask = el["mask"]
+                if not isinstance(mask, dict) or not isinstance(mask.get("src"), str) or not mask["src"].strip(): die(label + ".mask.src must be a non-empty path.", 2)
+                if "invert" in mask and not isinstance(mask["invert"], bool): die(label + ".mask.invert must be boolean.", 2)
             if "gradient" in el:
                 if el["type"] == "image": die(label + " images cannot use a fill gradient.", 2)
                 gradient(el["gradient"], label + ".gradient")
