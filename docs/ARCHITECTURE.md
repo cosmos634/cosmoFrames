@@ -24,6 +24,10 @@ It must remain optional. Installing or using the lightweight backend must never 
 
 The optional browser backend lives in `src/browser.ts`. It attaches to an already-running Chromium instance over CDP through the optional `playwright-core` package. A project supplies `browser_entry`, an HTML file relative to the project JSON. On each frame the renderer calls `window.cosmoframesRender(timeSeconds, frameIndex)` (or `window.renderAt`) when present, captures one PNG screenshot, and streams it into FFmpeg. This permits browser-native HTML/CSS/JS, Canvas, SVG and JS animation libraries while keeping Chromium out of the lightweight install path. The backend does not download or launch a browser automatically.
 
+## Effect plugin API
+
+The lightweight backend can load trusted Python effect modules listed in the project `plugins` array. A module exports `apply(image, time_seconds, settings)` and returns a Pillow image with unchanged dimensions. Plugin modules are cached in a bounded process-local cache. Loading a plugin executes Python code with the renderer's permissions, so projects must only reference trusted local files.
+
 ## Profiling
 
 The `benchmark` CLI command measures sequential frame-render throughput, Python-tracked peak allocations, and process peak RSS where the platform exposes it. It does not encode video and is intended for comparing settings on the target device.
