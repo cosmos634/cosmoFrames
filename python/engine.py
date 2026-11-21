@@ -43,8 +43,8 @@ def validate(p):
             if not isinstance(el, dict) or el.get("type") not in TYPES:
                 die("Unsupported element at " + label + ". Supported: " + ", ".join(sorted(TYPES)), 2)
             for prop in ("x", "y", "start", "end", "fontSize", "radius", "width", "height", "scale", "opacity", "rotation"):
-                if prop in el: number(el[prop], label + "." + prop, 0 if prop in ("start", "fontSize", "radius", "width", "height", "scale") else None)
-            if "start" in el and "end" in el and el["end"] <= el["start"]: die(label + ".end must be greater than start.", 2)
+                if prop in el: number(el[prop], label + "." + prop, 0 if prop in ("start", "end", "fontSize", "radius", "width", "height", "scale") else None)
+            if "end" in el and el["end"] <= el.get("start", 0): die(label + ".end must be greater than start.", 2)
             if el["type"] == "text" and not isinstance(el.get("text", ""), str): die(label + ".text must be a string.", 2)
             color(el.get("color", el.get("fill", "#ffffff")), label + ".color")
             if "strokeColor" in el: color(el["strokeColor"], label + ".strokeColor")
