@@ -5,7 +5,7 @@ A lightweight, CPU-first video rendering engine for Android Termux and Linux.
 ## V1 status
 
 The repository currently contains the first working-code foundation:
-- TypeScript CLI commands: info, init, validate, preview, render
+- TypeScript CLI commands: info, init, validate, preview, render, render-browser, benchmark
 - Modular Python package: validation, keyframe animation, Pillow drawing, FFmpeg export and CLI entry point
 - Python/Pillow frame renderer for text, rectangles, circles, polygons and images
 - Deterministic keyframe interpolation with linear, ease-in, ease-out and ease-in-out easing
@@ -14,7 +14,9 @@ The repository currently contains the first working-code foundation:
 - 480p vertical example project
 - Claude Code skill and project-format documentation
 
-Implemented: fade and directional wipe scene transitions (in/out), linear gradients, animated text/image dimensions, multi-track audio, bounded asset caches, alpha masks, and CPU blend modes (multiply, screen, add, overlay).\n\nThe optional Chromium/CDP backend is available through `render-browser`. It renders an HTML entry page using a deterministic `window.cosmoframesRender(timeSeconds, frameIndex)` hook and streams PNG frames into FFmpeg. It supports browser-native HTML/CSS/JS, Canvas, SVG and libraries such as GSAP when those are included by the page. Vector-path masks and GPU acceleration are not implemented.
+Implemented: fade and directional wipe scene transitions (in/out), linear gradients, animated text/image dimensions, multi-track audio, bounded asset caches, alpha masks, and CPU blend modes (multiply, screen, add, overlay).
+
+The optional Chromium/CDP backend is available through `render-browser`. It renders an HTML entry page using a deterministic `window.cosmoframesRender(timeSeconds, frameIndex)` hook and streams PNG frames into FFmpeg. It supports browser-native HTML/CSS/JS, Canvas, SVG and libraries such as GSAP when those are included by the page. Vector-path masks and GPU acceleration are not implemented.
 
 See [Architecture](docs/ARCHITECTURE.md) and [Project Format](docs/PROJECT_FORMAT.md) for implementation details.
 
@@ -50,7 +52,9 @@ node dist/cli.js benchmark examples/vertical-demo/project.json --frames 24
 
 The rendered file is written to examples/vertical-demo/cosmoframes-demo.mp4.
 
-Frame dimensions are capped at 8.3 megapixels per project to reduce out-of-memory failures on phones. Asset, font and gradient caches are bounded and kept intentionally small.\n\nTo create a new project:
+Frame dimensions are capped at 8.3 megapixels per project to reduce out-of-memory failures on phones. Asset, font and gradient caches are bounded and kept intentionally small.
+
+To create a new project:
 
 ```sh
 node dist/cli.js init my-video
