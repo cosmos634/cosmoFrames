@@ -20,3 +20,17 @@ A scene may define `transition_in`:
 ```
 
 The currently supported transition is `fade`. Its duration is measured in seconds; it fades the scene from transparent to fully visible. Unsupported transition types are rejected instead of silently ignored.
+
+
+## Audio tracks
+
+The legacy `audio` field remains supported for one audio file. For multiple tracks, use `audio_tracks`:
+
+```json
+"audio_tracks": [
+  { "src": "music.wav", "start": 0, "volume": 0.35 },
+  { "src": "voice.wav", "start": 1.2, "volume": 1.0 }
+]
+```
+
+Each track is mixed into the MP4 audio stream. `start` is its offset in project seconds and `volume` is a multiplier from 0 to 4. Audio paths are resolved relative to the project JSON file. If both `audio` and `audio_tracks` are present, the legacy audio file is mixed as an additional track.
